@@ -1,0 +1,60 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Assignment</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s02.html" title="Task instances"><link rel="next" href="ch11s04.html" title="Task instance variables"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Assignment</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="assignment"></a>Assignment</h2></div></div></div><p>A process definition contains task nodes.  A <code class="literal">task-node</code> 
+    contains zero or more tasks.  Tasks are a static description as part of the process 
+    definition.  At runtime, tasks result in the creation of task instances.  A task 
+    instance corresponds to one entry in a person's task list.</p><p>With jBPM, <a href="ch11s03.html#thepersonaltasklist" title="The personal task list">push (personal task list)</a> and 
+    <a href="ch11s03.html#thegrouptasklist" title="The group task list">pull (group task list)</a> model (see below) of 
+    task assignment can be applied in combination.  
+    The process can calculate the responsible for a task and push it in his/her tasklist.
+    Or alternatively, a task can be assigned to a pool of actors, in which case 
+    each of the actors in the pool can pull the task and put it in the actor's 
+    personal tasklist.
+    </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="assignmentinterfaces"></a>Assignment interfaces</h3></div></div></div><p>Assigning task instances is done via the interface 
+      <code class="literal">AssignmentHandler</code>:</p><pre class="programlisting">public interface AssignmentHandler extends Serializable {
+  void assign( Assignable assignable, ExecutionContext executionContext );
+}</pre><p>An assignment handler implementation is called when a task instance is 
+      created.  At that time, the task instance can be assigned to one or more actors.  
+      The <code class="literal">AssignmentHandler</code> implementation should 
+      call the <code class="literal">Assignable</code> methods (<code class="literal">setActorId</code> or 
+      <code class="literal">setPooledActors</code>) to assign a task.  The <code class="literal">Assignable</code> is either 
+      a <code class="literal">TaskInstance</code> or a <code class="literal">SwimlaneInstance</code> (=process role).
+      </p><pre class="programlisting">public interface Assignable {
+  public void setActorId(String actorId);
+  public void setPooledActors(String[] pooledActors);
+}</pre><p>Both <code class="literal">TaskInstance</code>s
+      and <code class="literal">SwimlaneInstance</code>s can be assigned to a specific user or to a pool 
+      of actors.  To assign a TaskInstance to a user, call 
+      <code class="literal">Assignable.setActorId(String actorId)</code>. To assign a TaskInstance to a pool
+      of candidate actors, call <code class="literal">Assignable.setPooledActors(String[] actorIds)</code>.
+      </p><p>Each task in the process definition can be associated with an assignment
+      handler implementation to perform the assignment at runtime.</p><p>When more than one task in a process should be assigned to the same person 
+      or group of actors, consider the usage of a <a href="ch11s06.html" title="Swimlanes">swimlane</a></p><p>To allow for the creation of reusable <code class="literal">AssignmentHandler</code>s,
+      each usage of an <code class="literal">AssignmentHandler</code> can be configured in 
+      the <code class="literal">processdefinition.xml</code>.  See <a href="ch17s02.html" title="Delegation">the section called &#8220;Delegation&#8221;</a> 
+      for more information on how to add configuration to assignment handlers.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="theassignmentdatamodel"></a>The assignment data model</h3></div></div></div><p>The datamodel for managing assignments of task instances and swimlane instances to 
+      actors is the following.  Each <code class="literal">TaskInstance</code> has an actorId
+      and a set of pooled actors.</p><div class="figure"><a name="assignment.model.image"></a><p class="title"><b>Figure&nbsp;11.1.&nbsp;The assignment model class diagram</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/assignment.model.gif" align="middle" alt="The assignment model class diagram"></div></div></div><br class="figure-break"><p>The actorId is the responsible for the task, while the 
+      set of pooled actors represents a collection of candidates that can become responsible 
+      if they would take the task.  Both actorId and pooledActors are optional and can 
+      also be combined.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thepersonaltasklist"></a>The personal task list</h3></div></div></div><p>The personal task list denotes all the task instances that are assigned to a specific individual.
+      This is indicated with the property <code class="literal">actorId</code> on a <code class="literal">TaskInstance</code>.  So 
+      to put a TaskInstance in someone's personal task list, you just use one of the following ways:
+      </p><div class="itemizedlist"><ul type="disc"><li>Specify an expression in the attribute <code class="literal">actor-id</code> of the task element in the process</li><li>Use TaskInstance.setActorId(String) from anywhere in your code</li><li>Use assignable.setActorId(String) in an AssignmentHandler</li></ul></div><p>To fetch the personal task list for a given user, use <code class="literal">TaskMgmtSession.findTaskInstances(String actorId)</code>.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thegrouptasklist"></a>The group task list</h3></div></div></div><p>The pooled actors denote the candidates for the task instance. This means that the task is offered to many users 
+      and one candidate has to step up and take the task.  Users can not start working on tasks in their group task list 
+      immediately.  That would result in a potential conflict that many people start working on the same task.  To prevent this,
+      users can only take task instances of their group task list and move them into their personal task list.  Users are only 
+      allowed to start working on tasks that are in their personal task list.
+      </p><p>To put a taskInstance in someone's group task list, you must put the user's actorId or one of the user's 
+      groupIds in the pooledActorIds.  So specify the pooled actors, use one of the following:
+      </p><div class="itemizedlist"><ul type="disc"><li>Specify an expression in the attribute <code class="literal">pooled-actor-ids</code> of the task element in the process</li><li>Use TaskInstance.setPooledActorIds(String[]) from anywhere in your code</li><li>Use assignable.setPooledActorIds(String[]) in an AssignmentHandler</li></ul></div><p>To fetch the group task list for a given user, proceed as follows: Make a collection that includes the user's actorId 
+      and all the ids of groups that the user belongs to. With <code class="literal">TaskMgmtSession.findPooledTaskInstances(String actorId)</code> or
+      <code class="literal">TaskMgmtSession.findPooledTaskInstances(List actorIds)</code> you can search for task instances that are not in a personal 
+      task list (actorId==null) and for which there is a match in the pooled actorIds.  
+      </p><p>The motivation behind this is that we want to separate the identity component from jBPM task assignment. jBPM only stores 
+      Strings as actorIds and doesn't know the relation between the users, groups and other identity information.
+      </p><p>The actorId will always override the pooled actors.  So a taskInstance that has an actorId and a list of pooledActorIds,
+      will only show up in the actor's personal task list.  Keeping the pooledActorIds around allows a user to put a task instance
+      back into the group by just setting the actorId property of the taskInstance to <code class="literal">null</code>.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Task instances&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Task instance variables</td></tr></table></div></body></html>

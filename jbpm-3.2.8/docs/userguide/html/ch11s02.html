@@ -1,0 +1,55 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Task instances</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="next" href="ch11s03.html" title="Assignment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Task instances</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="taskinstances"></a>Task instances</h2></div></div></div><p>A task instance can be assigned to an actorId (java.lang.String).  All task instances
+    are stored in one table of the database (JBPM_TASKINSTANCE).  By querying this table for 
+    all task instances for a given actorId, you get the task list for that perticular user.
+    </p><p>The jBPM task list mechanism can combine jBPM tasks with other tasks, even when those
+    tasks are unrelated to a process execution.  That way jBPM developers can easily combine 
+    jBPM-process-tasks with tasks of other applications in one centralized task-list-repository.
+    </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="taskinstancelifecycle"></a>Task instance lifecycle</h3></div></div></div><p>The task instance lifecycle is straightforward: After creation, task instances can optionally 
+      be started.  Then, task instances can be ended, which means that the task instance is marked as 
+      completed.</p><p>Note that for flexibility, assignment is not part of the life cycle.  So task instances 
+      can be assigned or not assigned.  Task instance assignment does not have an influence on the 
+      task instance life cycle.</p><p>Task instances are typically created by the process execution entering a 
+      <code class="literal">task-node</code> (with the method <code class="literal">TaskMgmtInstance.createTaskInstance(...)</code>).
+      Then, a user interface component will query the database for the tasklists using the 
+      <code class="literal">TaskMgmtSession.findTaskInstancesByActorId(...)</code>. Then, after collecting input 
+      from the user, the UI component calls <code class="literal">TaskInstance.assign(String)</code>, 
+      <code class="literal">TaskInstance.start()</code> or <code class="literal">TaskInstance.end(...)</code>.
+      </p><p>A task instance maintains it's state by means of date-properties : <code class="literal">create</code>, 
+      <code class="literal">start</code> and <code class="literal">end</code>.  Those properties can be accessed by 
+      their respective getters on the <code class="literal">TaskInstance</code>.</p><p>Currently, completed task instances are marked with an end date so that they are not 
+      fetched with subsequent queries for tasks lists.  But they remain in the JBPM_TASKINSTANCE 
+      table.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="taskinstancesandgraphexecution"></a>Task instances and graph execution</h3></div></div></div><p>Task instances are the items in an actor's tasklist.  Task instances 
+      can be signalling.  A signalling task instance is a task instance that, when 
+      completed, can send a signal to its token to continue the process execution.  
+      Task instances can be blocking, meaning that the related token (=path of 
+      execution) is not allowed to leave the task-node before the task instance is 
+      completed.  By default task instances are signalling and non-blocking.
+      </p><p>In case more than one task instance are associated with a task-node,
+      the process developer can specify how completion of the task instances affects
+      continuation of the process.  Following is the list of values that can be 
+      given to the signal-property of a task-node.</p><div class="itemizedlist"><ul type="disc"><li><span class="bold"><strong>last</strong></span>: This is the default.  Proceeds execution when the last task instance is completed. When no tasks are created on entrance of this node, execution is continued.</li><li><span class="bold"><strong>last-wait</strong></span>:                  Proceeds execution when the last task instance is completed. When no tasks are created on entrance of this node, execution waits in the task node till tasks are created.</li><li><span class="bold"><strong>first</strong></span>:                      Proceeds execution when the first task instance is completed. When no tasks are created on entrance of this node, execution is continued.</li><li><span class="bold"><strong>first-wait</strong></span>:                 Proceeds execution when the first task instance is completed. When no tasks are created on entrance of this node, execution waits in the task node till tasks are created.</li><li><span class="bold"><strong>unsynchronized</strong></span>: Execution always continues, regardless wether tasks are created or still unfinished.</li><li><span class="bold"><strong>never</strong></span>: Execution never continues, regardless wether tasks are created or still unfinished.</li></ul></div><p>Task instance creation might be based upon a runtime calculation.  In that case, add an 
+      <code class="literal">ActionHandler</code> on the <code class="literal">node-enter</code> event of the <code class="literal">task-node</code> and 
+      set the attribute <code class="literal">create-tasks="false"</code>.  Here is an example of such an action handler implementation:
+      </p><pre class="programlisting">public class CreateTasks implements ActionHandler {
+  public void execute(ExecutionContext executionContext) throws Exception {
+    Token token = executionContext.getToken();
+    TaskMgmtInstance tmi = executionContext.getTaskMgmtInstance();
+      
+    TaskNode taskNode = (TaskNode) executionContext.getNode();
+    Task changeNappy = taskNode.getTask("change nappy");
+
+    // now, 2 task instances are created for the same task.
+    tmi.createTaskInstance(changeNappy, token);
+    tmi.createTaskInstance(changeNappy, token);
+  }
+}</pre><p>As shown in the example the tasks to be created can be specified 
+      in the task-node.  They could also be specified in the 
+      <code class="literal">process-definition</code> and fetched from the 
+      <code class="literal">TaskMgmtDefinition</code>.  <code class="literal">TaskMgmtDefinition</code> extends 
+      the ProcessDefinition with task management information.</p><p>The API method for marking task instances as completed is 
+      <code class="literal">TaskInstance.end()</code>.  Optionally, you can specify a transition 
+      in the end method.   In case the completion of this task instance triggers 
+      continuation of the execution, the task-node is left over the specified 
+      transition.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;11.&nbsp;Task management&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Assignment</td></tr></table></div></body></html>

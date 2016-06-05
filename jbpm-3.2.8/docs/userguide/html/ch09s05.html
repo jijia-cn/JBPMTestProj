@@ -1,0 +1,108 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Actions</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch09.html" title="Chapter&nbsp;9.&nbsp;Process Modelling"><link rel="prev" href="ch09s04.html" title="Transitions"><link rel="next" href="ch09s06.html" title="Superstates"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Actions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch09s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;9.&nbsp;Process Modelling</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch09s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="actions"></a>Actions</h2></div></div></div><p>Actions are pieces of java code that are executed upon events in the process 
+    execution. The graph is an important instrument in the communication about software 
+    requirements. But the graph is just one view (projection) of the software being produced.  
+    It hides many technical details.  Actions are a mechanism to add technical details outside 
+    of the graphical representation. Once the graph is put in place, it can be decorated with 
+    actions.  This means that java code can be associated with the graph without changing the 
+    structure of the graph. The main event types are entering a node, leaving a node and taking a 
+    transition.</p><p>Note the difference between an action that is placed in an event versus an action 
+    that is placed in a node.  Actions that are put in an event are executed when the event 
+    fires.  Actions on events have no way to influence the flow of control of the process. 
+    It is similar to the observer pattern.  On the other hand, an action that is put on a 
+    <a href="ch09s03.html#nodetypenode" title="Nodetype node">node</a> has the <a href="ch09s03.html#noderesponsibilities" title="Node responsibilities">responsibility 
+    of propagating the execution</a>.</p><p>Let's look at an example of an action on an event.  Suppose we want to do a database 
+    update on a given transition.  The database update is technically vital but it is not important 
+    to the business analyst.</p><div class="figure"><a name="database.update.example.image"></a><p class="title"><b>Figure&nbsp;9.2.&nbsp;A database update action</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/database.update.example.gif" align="middle" alt="A database update action"></div></div></div><br class="figure-break"><pre class="programlisting">public class RemoveEmployeeUpdate implements ActionHandler {
+  public void execute(ExecutionContext ctx) throws Exception {
+    // get the fired employee from the process variables.
+    String firedEmployee = (String) ctx.getContextInstance().getVariable("fired employee");
+    
+    // by taking the same database connection as used for the jbpm updates, we 
+    // reuse the jbpm transaction for our database update.
+    Connection connection = ctx.getProcessInstance().getJbpmSession().getSession().getConnection();
+    Statement statement = connection.createStatement();
+    statement.execute("DELETE FROM EMPLOYEE WHERE ...");
+    statement.execute(); 
+    statement.close();
+  }
+}</pre><pre class="programlisting">&lt;process-definition name="yearly evaluation"&gt;
+
+  ...
+  &lt;state name="fire employee"&gt;
+    &lt;transition to="collect badge"&gt;
+      &lt;action class="com.nomercy.hr.RemoveEmployeeUpdate" /&gt;
+    &lt;/transition&gt;
+  &lt;/state&gt;
+  
+  &lt;state name="collect badge"&gt;
+  ...
+  
+&lt;/process-definition&gt;</pre><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="actionconfiguration"></a>Action configuration</h3></div></div></div><p>For more information about adding configurations to your custom actions and how 
+	    to specify the configuration in the <code class="literal">processdefinition.xml</code>, 
+	    see <a href="ch17s02.html#configurationofdelegations" title="Configuration of delegations">the section called &#8220;Configuration of delegations&#8221;</a>
+	    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="actionreferences"></a>Action references</h3></div></div></div><p>Actions can be given a name.  Named actions can be referenced from other 
+      locations where actions can be specified. Named actions can also be put as child 
+      elements in the process definition.</p><p>This feature is interesting if you want to limit duplication of action 
+      configurations (e.g. when the action has complicated configurations).  Another 
+      use case is execution or scheduling of runtime actions.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="events"></a>Events</h3></div></div></div><p>Events specify moments in the execution of the process.  The jBPM engine 
+      will fire events during graph execution.  This occurs when jbpm calculats the 
+      next state (read: processing a signal).  An event is always relative to an element 
+      in the process definition like e.g. the process definition, a node or a transition.
+      Most process elements can fire different types of events.  A node for example can 
+      fire a <code class="literal">node-enter</code> event and a <code class="literal">node-leave</code>
+      event.  Events are the hooks for actions.  Each event has a list of actions.
+      When the jBPM engine fires an event, the list of actions is executed.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="eventpropagation"></a>Event propagation</h3></div></div></div><p>Superstates create a parent-child relation in the elements of a process definition.
+      Nodes and transitions contained in a superstate have that superstate as a parent.  Top level 
+      elements have the process definition as a parent.  The process definition does not have a 
+      parent.  When an event is fired, the event will be propagated up the parent hierarchy.
+      This allows e.g. to capture all transition events in a process and associate actions 
+      with these events in a centralized location.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="script"></a>Script</h3></div></div></div><p>A script is an action that executes a beanshell script.  For more information about beanshell, 
+      see <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.beanshell.org/" target="_top">the beanshell website</a>.  
+      By default, all process variables are available as script-variables and no script-variables will be 
+      written to the process variables.  Also the following script-variables will be available :
+      </p><div class="itemizedlist"><ul type="disc"><li>executionContext</li><li>token</li><li>node</li><li>task</li><li>taskInstance</li></ul></div><pre class="programlisting">&lt;process-definition&gt;
+  &lt;event type="node-enter"&gt;
+    &lt;script&gt;
+      System.out.println("this script is entering node "+node);
+    &lt;/script&gt;
+  &lt;/event&gt;
+  ...
+&lt;/process-definition&gt;</pre><p>To customize the default behaviour of loading and storing variables into the script, the 
+      <code class="literal">variable</code> element can be used as a sub-element of script.  In that case,
+      the script expression also has to be put in a subelement of script: <code class="literal">expression</code>.  
+      </p><pre class="programlisting">&lt;process-definition&gt;
+  &lt;event type="process-end"&gt;
+    &lt;script&gt;
+      &lt;expression&gt;
+        a = b + c;
+      &lt;/expression&gt;
+      &lt;variable name='XXX' access='write' mapped-name='a' /&gt;
+      &lt;variable name='YYY' access='read' mapped-name='b' /&gt;
+      &lt;variable name='ZZZ' access='read' mapped-name='c' /&gt;
+    &lt;/script&gt;
+  &lt;/event&gt;
+  ...
+&lt;/process-definition&gt;</pre><p>Before the script starts, the process variables <code class="literal">YYY</code> and 
+      <code class="literal">ZZZ</code> will be made available to the script as script-variables
+      <code class="literal">b</code> and <code class="literal">c</code> respectively.  After the script is 
+      finished, the value of script-variable <code class="literal">a</code> is stored into the 
+      process variable <code class="literal">XXX</code>.</p><p>If the <code class="literal">access</code> attribute of <code class="literal">variable</code> contains 
+      '<code class="literal">read</code>', the 
+      process variable will be loaded as a script-variable before script evaluation.  If the 
+      <code class="literal">access</code> attribute contains '<code class="literal">write</code>', the script-variable 
+      will be stored as a process variable after evaluation.
+      The attribute <code class="literal">mapped-name</code> can make the process variable available under another
+      name in the script.  This can be handy when your process variable names contain spaces or other 
+      invalid script-literal-characters.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="customevents"></a>Custom events</h3></div></div></div><p>Note that it's possible to fire your own custom events at will during the 
+      execution of a process.  Events are uniquely defined by the combination of a graph 
+      element (nodes, transitions, process definitions and superstates are graph elements)
+      and an event-type (java.lang.String).  jBPM defines a set of events that are fired for 
+      nodes, transitions and other graph elements.  But as a user, you are free to fire your 
+      own events.   In actions, in your own custom node implementations, or even outside the execution 
+      of a process instance, you can call the <code class="literal">GraphElement.fireEvent(String eventType, 
+      ExecutionContext executionContext);</code>.  The names of the event types can 
+      be chosen freely.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch09s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch09.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch09s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Transitions&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Superstates</td></tr></table></div></body></html>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.jbpm.gd.jpdl.feature_3.1.7.jar" id="org.jbpm.gd.jpdl.feature" version="3.1.7">
+      <category name="org.jbpm.gd"/>
+   </feature>
+   <feature url="features/org.jbpm.gd.jpdl.docs_3.1.7.jar" id="org.jbpm.gd.jpdl.docs" version="3.1.7" patch="true">
+      <category name="org.jbpm.gd"/>
+   </feature>
+   <category-def name="org.jbpm.gd" label="JBoss jBPM Graphical Designer Updates"/>
+</site>

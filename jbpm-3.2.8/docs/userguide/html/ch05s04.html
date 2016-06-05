@@ -1,0 +1,18 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Logging of optimistic concurrency exceptions</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Configuration"><link rel="prev" href="ch05s03.html" title="Other configuration files"><link rel="next" href="ch05s05.html" title="Object factory"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Logging of optimistic concurrency exceptions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;5.&nbsp;Configuration</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="loggingofoptimisticconcurrencyexceptions"></a>Logging of optimistic concurrency exceptions</h2></div></div></div><p>When running in a cluster, jBPM synchronizes on the database.  By default with optimistic 
+      locking.  This means that each operation is performed in a transaction.  And if at the end a
+      collision is detected, then the transaction is rolled back and has to be handled.  E.g. by a 
+      retry.  So optimistic locking exceptions are usually part of the normal operation.  Therefor,
+      by default, the <code class="literal">org.hibernate.StateObjectStateException</code>s the that hibernate 
+      throws in that case are not logged with error and a stack trace, but instead a simple info 
+      message 'optimistic locking failed' is displayed.
+    </p><p>Hibernate itself will log the StateObjectStateException including a stack trace.  If you 
+    want to get rid of these stack traces, put the level of 
+    <code class="literal">org.hibernate.event.def.AbstractFlushingEventListener</code> to FATAL.  If you use 
+    log4j following line of configuration can be used for that:
+    </p><pre class="programlisting">log4j.logger.org.hibernate.event.def.AbstractFlushingEventListener=FATAL</pre><p>
+    </p><p>If you want to enable logging of the jBPM stack traces, add the following line to your 
+    jbpm.cfg.xml:
+    </p><pre class="programlisting">&lt;boolean name="jbpm.hide.stale.object.exceptions" value="false" /&gt;</pre><p>.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Other configuration files&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Object factory</td></tr></table></div></body></html>

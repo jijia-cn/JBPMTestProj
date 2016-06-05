@@ -1,0 +1,45 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Deployment in JBoss</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Deployment"><link rel="prev" href="ch04s03.html" title="Third party libraries"><link rel="next" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Configuration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Deployment in JBoss</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;4.&nbsp;Deployment</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="deploymentinjboss"></a>Deployment in JBoss</h2></div></div></div><p>The installer deploys jBPM into JBoss.  This section walks you through the deployed components.
+    </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thejbpmdirectory"></a>The jbpm directory</h3></div></div></div><p>When jBPM is installed on a server configuration in JBoss, only the jbpm directory is 
+      added to the deploy directory and all components will be deployed under that directory.
+      No other files of JBoss are changed or added outside that directory. 
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="theenterprisebundle"></a>The enterprise bundle</h3></div></div></div><p>The enterprise bundle is a J2EE web application that contains the jBPM enterprise beans
+      and the JSF based console.  The enterprise beans are located in 
+      <code class="literal">\deploy\jbpm\jbpm-enterprise-bundle.ear\jbpm-enterprise-beans.jar</code> and the 
+      JSF web application is located at  
+      <code class="literal">\deploy\jbpm\jbpm-enterprise-bundle.ear\jsf-console.war</code>
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="configuringthelogsinthesuiteserver"></a>Configuring the logs in the suite server</h3></div></div></div><p>If you want to see debug logs in the suite server, update file 
+      <code class="literal">jboss-{version}/server/default/config/log4j.xml</code>
+      Look for
+      </p><pre class="programlisting">   &lt;!-- ============================== --&gt;
+   &lt;!-- Append messages to the console --&gt;
+   &lt;!-- ============================== --&gt;
+
+   &lt;appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender"&gt;
+      &lt;errorHandler class="org.jboss.logging.util.OnlyOnceErrorHandler"/&gt;
+      &lt;param name="Target" value="System.out"/&gt;
+      &lt;param name="Threshold" value="INFO"/&gt;</pre><p>And in param <code class="literal">Threshold</code>, change <code class="literal">INFO</code> to 
+      <code class="literal">DEBUG</code>.
+      </p><p>Then you'll get debug logs of all the components.  To limit the number of debug logs, 
+      look a bit further down that file until you see 'Limit categories'.  You might want to add 
+      tresholds there for specific packages like e.g. </p><pre class="programlisting">   &lt;category name="org.hibernate"&gt;
+      &lt;priority value="INFO"/&gt;
+   &lt;/category&gt;
+
+   &lt;category name="org.jboss"&gt;
+      &lt;priority value="INFO"/&gt;
+   &lt;/category&gt;</pre></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="debuggingaprocessinthesuite"></a>Debugging a process in the suite</h3></div></div></div><p>First of all, in case you're just starting to develop a new process, 
+      it is much easier to use plain JUnit tests and run the process in memory like 
+      explained in <a href="ch03.html" title="Chapter&nbsp;3.&nbsp;Tutorial">Chapter&nbsp;3, <i xmlns:xlink="http://www.w3.org/1999/xlink">Tutorial</i></a>.
+      </p><p>But if you want to run the process in the console and debug it there
+      here are the 2 steps that you need to do: 
+      </p><p>1) in 
+      <code class="literal">jboss-{version}/server/bin/run.bat</code>, somewhere at the end, 
+      there is a line like this:</p><pre class="programlisting">rem set JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y %JAVA_OPTS%</pre><p>For backup reasons, just start by making a copy of that line, then remove the first '<code class="literal">rem</code>'
+      and change <code class="literal">suspend=y</code> to <code class="literal">suspend=n</code>.  Then you get something like</p><pre class="programlisting">rem set JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y %JAVA_OPTS%
+set JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n %JAVA_OPTS%</pre><p>2) In your IDE debug by connecting to a remote Java application on localhost on 
+      port 8787.  Then you can start adding break points and run through the processes with the console
+      until the breakpoint is hit.
+      </p><p>For more info about configuring logging of optimistic locking failures, 
+      see <a href="ch05s04.html" title="Logging of optimistic concurrency exceptions">the section called &#8220;Logging of optimistic concurrency exceptions&#8221;</a></p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Third party libraries&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;5.&nbsp;Configuration</td></tr></table></div></body></html>

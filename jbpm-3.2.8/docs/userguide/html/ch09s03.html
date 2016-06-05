@@ -1,0 +1,85 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Nodes</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch09.html" title="Chapter&nbsp;9.&nbsp;Process Modelling"><link rel="prev" href="ch09s02.html" title="Process graph"><link rel="next" href="ch09s04.html" title="Transitions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Nodes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;9.&nbsp;Process Modelling</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="nodes"></a>Nodes</h2></div></div></div><p>A process graph is made up of nodes and transitions.  For more information about the 
+    graph and its executional model, refer to <a href="">???</a>.
+    </p><p>Each node has a specific type.  The node type determines what will happen when 
+    an execution arrives in the node at runtime.  jBPM has a set of preimplemented node types 
+    that you can use.  Alternatively, you can write custom code for implementing your own specific 
+    node behaviour.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="noderesponsibilities"></a>Node responsibilities</h3></div></div></div><p>Each node has 2 main responsibilities: First, it can execute plain java code. 
+      Typically the plain java code relates to the function of the node.  E.g. creating a 
+      few task instances, sending a notification, updating a database,...  Secondly, a node 
+      is responsible for propagating the process execution.  Basically, each node has the 
+      following options for propagating the process execution:</p><div class="itemizedlist"><ul type="disc"><li><span class="bold"><strong>1. not propagate the execution.</strong></span>  In that 
+        case the node behaves as a wait state.</li><li><span class="bold"><strong>2. propagate the execution over one of the leaving 
+        transitions of the node.</strong></span>  This means that the token that originally 
+        arrived in the node is passed over one of the leaving transitions with the API call
+        executionContext.leaveNode(String).  The node will now act as an automatic node in the 
+        sense it can execute some custom programming logic and then continue process execution 
+        automatically without waiting.</li><li><span class="bold"><strong>3. create new paths of execution.</strong></span> A node can
+        decide to create new tokens.  Each new token represents a new path of execution and 
+        each new token can be launched over the node's leaving transitions. A good example of 
+        this kind of behaviour is the fork node.</li><li><span class="bold"><strong>4. end paths of execution.</strong></span> A node can decide
+        to end a path of execution. That means that the token is ended and the path of execution
+        is finished.</li><li><span class="bold"><strong>5. more general, a node can modify the whole runtime 
+        structure of the process instance.</strong></span>  The runtime structure is a process instance 
+        that contains a tree of tokens.  Each token represents a path of execution.  A node can 
+        create and end tokens, put each token in a node of the graph and launch tokens over 
+        transitions.</li></ul></div><p>jBPM contains --as any workflow and BPM engine-- a set of preimplemented node types
+      that have a specific documented configuration and behaviour.  But the unique thing about 
+      jBPM and the <a href="">Graph Oriented Programming foundation</a>
+      is that we open up the model for developers.  Developers can write their own node behaviour
+      very easy and use it in a process.
+      </p><p>That is where traditional workflow and BPM systems are
+      much more closed.  They usually supply a fixed set of node types (called the process language).
+      Their process language is closed and the executional model is hidden in the runtime 
+      environment.  Research of <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.workflowpatterns.com" target="_top">workflow patterns</a>
+      has shown that any process language is not powerfull enough.  We have decided for a simple 
+      model and allow developers to write their own node types.  That way the JPDL process language 
+      is open ended.</p><p>Next, we discuss the most important node types of JPDL.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypetasknode"></a>Nodetype task-node</h3></div></div></div><p>A task node represents one or more tasks that are to be performed by humans.
+      So when execution arrives in a task node, task instances will be created in the task 
+      lists of the workflow participants.  After that, the node will behave as a wait state.
+      So when the users perform their task, the task completion will trigger the resuming 
+      of the execution. In other words, that leads to a new signal being called on the token.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypetaskstate"></a>Nodetype state</h3></div></div></div><p>A state is a bare-bones wait state.  The difference with a task node is that 
+      no task instances will be created in any task list.  This can be usefull if the process 
+      should wait for an external system.  E.g. upon entry of the node (via an action on the node-enter
+      event), a message could be sent to the external system.  After that, the process will
+      go into a wait state.  When the external system send a response message, this can lead to 
+      a token.signal(), which triggers resuming of the process execution.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypedecision"></a>Nodetype decision</h3></div></div></div><p>Actually there are 2 ways to model a decision.  The distinction between the two 
+      is based on *who* is making the decision.  Should the decision made by the process (read:
+      specified in the process definition).  Or should an external entity provide the result of 
+      the decision.</p><p>When the decision is to be taken by the process, a decision node should be used.
+      There are basically 2 ways to specify the decision criteria.  Simplest is by adding 
+      condition elements on the transitions.  Conditions are EL expressions or beanshell scripts
+      that return a boolean.</p><p>At runtime the decision node will FIRST loop over its leaving transitions THAT HAVE 
+      a condition specified.  It will evaluate those transitions first in 
+      the order as specified in the xml.  The first transition for which the conditions resolves to 
+      'true' will be taken.  If all transitions with a condition resolve to false, the default 
+      transition (the first in the XML) is taken.</p><p>Another approach is to use an expression that returns the name 
+      of the transition to take.  With the 'expression' attribute, you can specify an expression
+      on the decision that has to resolve to one of the leaving transitions of the decision node.</p><p>Next aproach is the 'handler' element on the decision, that element can be used to specify
+      an implementation of the DecisionHandler interface can be specified on the decision node.  Then the 
+      decision is calculated in a java class and the selected leaving transition is returned by the decide-method 
+      of the DecisionHandler implementation.</p><p>When the decision is taken by an external party (meaning: not part of the process 
+      definition), you should use multiple transitions leaving a state or wait state node.
+      Then the leaving transition can be provided in the external trigger that resumes execution
+      after the wait state is finished.  E.g. <code class="literal">Token.signal(String transitionName)</code> 
+      and <code class="literal">TaskInstance.end(String transitionName)</code>.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypefork"></a>Nodetype fork</h3></div></div></div><p>A fork splits one path of execution into multiple concurrent paths of execution.  The 
+      default fork behaviour is to create a child token for each transition that leaves the fork,
+      creating a parent-child relation between the token that arrives in the fork.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypejoin"></a>Nodetype join</h3></div></div></div><p>The default join assumes that all tokens that arrive in the join are children of the
+      same parent.  This situation is created when using the fork as mentioned above and when all 
+      tokens created by a fork arrive in the same join. A join will end every token that enters the 
+      join.  Then the join will examine the parent-child relation of the token that enters the 
+      join.  When all sibling tokens have arrived in the join, the parent token will be propagated 
+      over the (unique!) leaving transition.  When there are still sibling tokens active, the join
+      will behave as a wait state.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="nodetypenode"></a>Nodetype node</h3></div></div></div><p>The type node serves the situation where you want to write your own code in a node.
+      The nodetype node expects one subelement action.  The action is executed when the execution
+      arrives in the node.  The code you write in the actionhandler can do anything you want but 
+      it is also <a href="ch09s03.html#noderesponsibilities" title="Node responsibilities">responsible for propagating the execution</a>.
+      </p><p>This node can be used if you want to use a JavaAPI to implement some functional logic that 
+      is important for the business analyst.  By using a node, the node is visible in the graphical
+      representation of the process.  For comparison, actions --covered next-- will allow you to 
+      add code that is invisible in the graphical representation of the process, in case that logic 
+      is not important for the business analyst.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch09.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Process graph&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Transitions</td></tr></table></div></body></html>

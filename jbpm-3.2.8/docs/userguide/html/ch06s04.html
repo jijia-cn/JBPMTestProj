@@ -1,0 +1,43 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>JTA transactions</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06s03.html" title="Hibernate transactions"><link rel="next" href="ch06s05.html" title="Customizing queries"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">JTA transactions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="jtatransactions"></a>JTA transactions</h2></div></div></div><p>The most common scenario for managed transactions is when using jBPM in a JEE application 
+      server like JBoss.  The most common scenario to bind your transactions to JTA is the following:
+    </p><pre class="programlisting">  &lt;jbpm-context&gt;
+    &lt;service name="persistence"&gt;
+      &lt;factory&gt;
+        &lt;bean class="org.jbpm.persistence.db.DbPersistenceServiceFactory"&gt;
+          &lt;field name="isTransactionEnabled"&gt;&lt;false /&gt;&lt;/field&gt;
+          &lt;field name="isCurrentSessionEnabled"&gt;&lt;true /&gt;&lt;/field&gt;
+          &lt;field name="sessionFactoryJndiName"&gt;
+            &lt;string value="java:/myHibSessFactJndiName" /&gt;
+          &lt;/field&gt;
+        &lt;/bean&gt;
+      &lt;/factory&gt;
+    &lt;/service&gt;
+    ...
+  &lt;/jbpm-context&gt;</pre><p>Then you should specify in your hibernate session factory to use a datasource and 
+      bind hibernate to the transaction manager.  Make sure that you bind the datasource 
+      to an XA datasource in case you're using more then 1 resource.  For more information 
+      about binding hibernate to your transaction manager, please, refer to 
+      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html_single/#configuration-optional-transactionstrategy" target="_top">paragraph 
+      'Transaction strategy configuration' in the hibernate documentation</a>.
+    </p><pre class="programlisting">&lt;hibernate-configuration&gt;
+  &lt;session-factory&gt;
+
+    &lt;!-- hibernate dialect --&gt;
+    &lt;property name="hibernate.dialect"&gt;org.hibernate.dialect.HSQLDialect&lt;/property&gt;
+
+    &lt;!-- DataSource properties (begin) --&gt;
+    &lt;property name="hibernate.connection.datasource"&gt;java:/JbpmDS&lt;/property&gt;
+
+    &lt;!-- JTA transaction properties (begin) --&gt;
+    &lt;property name="hibernate.transaction.factory_class"&gt;org.hibernate.transaction.JTATransactionFactory&lt;/property&gt;
+    &lt;property name="hibernate.transaction.manager_lookup_class"&gt;org.hibernate.transaction.JBossTransactionManagerLookup&lt;/property&gt;
+    &lt;property name="jta.UserTransaction"&gt;java:comp/UserTransaction&lt;/property&gt;
+
+    ...
+  &lt;/session-factory&gt;
+&lt;/hibernate-configuration&gt;</pre><p>Then make sure that you have configured hibernate to use an XA datasource.
+    </p><p>These configurations allow for the enterprise beans to use CMT and still allow the 
+    web console to use BMT.   That is why the property 'jta.UserTransaction' is also specified.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Hibernate transactions&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Customizing queries</td></tr></table></div></body></html>

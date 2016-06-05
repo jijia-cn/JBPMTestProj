@@ -1,0 +1,33 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Third party libraries</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Deployment"><link rel="prev" href="ch04s02.html" title="Java runtime environment"><link rel="next" href="ch04s04.html" title="Deployment in JBoss"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Third party libraries</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch04s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;4.&nbsp;Deployment</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="thirdpartylibraries"></a>Third party libraries</h2></div></div></div><p>All the libraries on which jPDL might have a dependency, are located in 
+      the lib directory.  The actual version of those libraries might depend 
+      on the JBoss server that you've selected in the installer.
+    </p><p>In a minimal deployment, you can create and run processes with jBPM
+      by putting only the commons-logging and dom4j library in your classpath.  
+      Beware that persisting processes to a database is not supported.  The 
+      dom4j library can be removed if you don't use the process xml parsing, 
+      but instead build your object graph programatically.
+    </p><div class="table"><a name="minimal.dependencies.table"></a><p class="title"><b>Table&nbsp;4.1.&nbsp;</b></p><div class="table-contents"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th align="center">Library</th><th align="center">Usage</th><th align="center">Description</th></tr></thead><tbody><tr><td>commons-logging.jar</td><td>logging in jbpm and hibernate</td><td>The jBPM code logs to commons logging. The commons logging 
+            library can be configured to dispatch the logs to e.g. 
+            java 1.4 logging, log4j, ...  See 
+            <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://jakarta.apache.org/commons/logging/guide.html" target="_top">
+            the apache commons user guide</a> for more information on how 
+            to configure commons logging.  if you're used to log4j, the easiest 
+            way is to put the log4j lib and a log4j.properties in the classpath.
+            commons logging will automatically detect this and use that configuration.
+            </td></tr><tr><td>dom4j.jar</td><td>process definitions and hibernate persistence</td><td>xml parsing</td></tr></tbody></table></div></div><br class="table-break"><p>A typical deployment for jBPM will include persistent storage of 
+      process definitions and process executions.  In that case, jBPM does 
+      not have any dependencies outside hibernate and its dependent libraries.
+    </p><p>Of course, hibernate's required libraries depend on the environment
+      and what features you use.  For details refer to the hibernate 
+      documentation.  The next table gives an indication for a plain 
+      standalone POJO development environment.
+    </p><div class="table"><a name="typical.dependencies.table"></a><p class="title"><b>Table&nbsp;4.2.&nbsp;</b></p><div class="table-contents"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th align="center">Library</th><th align="center">Usage</th><th align="center">Description</th></tr></thead><tbody><tr><td>hibernate.jar</td><td>hibernate persistence</td><td>the best O/R mapper</td></tr><tr><td>antlr.jar</td><td>used in query parsing by hibernate persistence</td><td>parser library</td></tr><tr><td>cglib.jar</td><td>hibernate persistence</td><td>reflection library used for hibernate proxies</td></tr><tr><td>commons-collections.jar</td><td>hibernate persistence</td><td>&nbsp;</td></tr><tr><td>asm.jar</td><td>hibernate persistence</td><td>asm byte code library</td></tr></tbody></table></div></div><br class="table-break"><p>The beanshell library is optional.  If you don't include it, you won't be 
+      able to use the beanshell integration in the jBPM process language and 
+      you'll get a log message saying that jbpm couldn't load the Script class
+      and hence, the script element won't be available.
+    </p><div class="table"><a name="optional.dependencies.table"></a><p class="title"><b>Table&nbsp;4.3.&nbsp;</b></p><div class="table-contents"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th align="center">Library</th><th align="center">Usage</th><th align="center">Description</th></tr></thead><tbody><tr><td>bsh.jar</td><td>beanshell script interpreter</td><td>Only used in the script's and decision's.  When you don't use
+            these process elements, the beanshell lib can be removed, but then you 
+            have to comment out the Script.hbm.xml mapping line in the 
+            <code class="literal">hibernate.cfg.xml</code> </td></tr></tbody></table></div></div><br class="table-break"></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch04s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Java runtime environment&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Deployment in JBoss</td></tr></table></div></body></html>

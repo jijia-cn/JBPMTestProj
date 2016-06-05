@@ -1,0 +1,14 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Task instance variables</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s03.html" title="Assignment"><link rel="next" href="ch11s05.html" title="Task controllers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Task instance variables</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="taskinstancevariables"></a>Task instance variables</h2></div></div></div><p>A task instance can have its own set of variables and a task instance can 
+      also 'see' the process variables.  Task instances are usually created in an execution 
+      path (=token).  This creates a parent-child relation between the token and the task 
+      instance similar to the parent-child relation between the tokens themselves.  
+      The normal scoping rules apply between the variables of a task instance and the 
+      process variables of the related token.  More info about scoping can be found 
+      in <a href="ch10s04.html" title="Variables scopes">the section called &#8220;Variables scopes&#8221;</a>.
+    </p><p>This means that a task instance can 'see' its own variables plus all the variables 
+      of its related token.
+    </p><p>The controller can be used to create populate and submit variables between 
+      the task instance scope and the process scoped variables.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Assignment&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Task controllers</td></tr></table></div></body></html>

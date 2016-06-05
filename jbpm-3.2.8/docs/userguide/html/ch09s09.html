@@ -1,0 +1,27 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Custom node behaviour</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch09.html" title="Chapter&nbsp;9.&nbsp;Process Modelling"><link rel="prev" href="ch09s08.html" title="Process composition"><link rel="next" href="ch09s10.html" title="Graph execution"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Custom node behaviour</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch09s08.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;9.&nbsp;Process Modelling</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch09s10.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customnodebehaviour"></a>Custom node behaviour</h2></div></div></div><p>In jBPM, it's quite easy to write your own custom nodes.  For creating custom nodes, an 
+    implementation of the ActionHandler has to be written.  The implementation can execute any 
+    business logic, but also has the responsibility to propagate the graph execution.  Let's look 
+    at an example that will update an ERP-system.  We'll read an amout from the ERP-system, add 
+    an amount that is stored in the process variables and store the result back in the ERP-system.
+    Based on the size of the amount, we have to leave the node via the 'small amounts' or the 
+    'large amounts' transition.
+    </p><div class="figure"><a name="update.erp.example.image"></a><p class="title"><b>Figure&nbsp;9.3.&nbsp;The update erp example process snippet</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/update.erp.example.gif" align="middle" alt="The update erp example process snippet"></div></div></div><br class="figure-break"><pre class="programlisting">public class AmountUpdate implements ActionHandler {
+  public void execute(ExecutionContext ctx) throws Exception {
+    // business logic
+    Float erpAmount = ...get amount from erp-system...;
+    Float processAmount = (Float) ctx.getContextInstance().getVariable("amount");
+    float result = erpAmount.floatValue() + processAmount.floatValue();
+    ...update erp-system with the result...;
+    
+    // graph execution propagation
+    if (result &gt; 5000) {
+      ctx.leaveNode(ctx, "big amounts");
+    } else {
+      ctx.leaveNode(ctx, "small amounts");
+    }
+  }
+}</pre><p>It is also possible to create and join tokens in custom node 
+    implementations.  For an example on how to do this, check out the Fork and 
+    Join node implementation in the jbpm source code :-).</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch09s08.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch09.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch09s10.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Process composition&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Graph execution</td></tr></table></div></body></html>

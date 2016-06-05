@@ -1,0 +1,18 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>The jBPM core library</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch01.html" title="Chapter&nbsp;1.&nbsp;Introduction"><link rel="prev" href="ch01s04.html" title="The jBPM console web application"><link rel="next" href="ch01s06.html" title="The JBoss jBPM identity component"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">The jBPM core library</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch01s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;1.&nbsp;Introduction</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch01s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e124"></a>The jBPM core library</h2></div></div></div><p>The JBoss jBPM core component is the plain java (J2SE) library for managing 
+    process definitions and the runtime environment for execution of process instances.
+    </p><p>JBoss jBPM is a java library.  As a consequence, it can be used in any java 
+    environment like e.g. a webapplication, a swing application, an EJB, a webservice,...
+    The jBPM library can also be packaged and exposed as a stateless session EJB.  This
+    allows clustered deployment and scalability for extreme high throughput.  The stateless
+    session EJB will be written against the J2EE 1.4 specifications so that it is 
+    deployable on any application server.
+    </p><p>Depending on the functionalities that you use, the library <code class="literal">lib/jbpm-jpdl.jar</code> 
+    has some dependencies on other third party libraries such as e.g. hibernate, dom4j
+    and others.  We have done great efforts to require only those dependent libraries that 
+    you actually use.  The dependencies are further documented in <a href="ch04.html" title="Chapter&nbsp;4.&nbsp;Deployment">Chapter&nbsp;4, <i xmlns:xlink="http://www.w3.org/1999/xlink">Deployment</i></a></p><p>For its persistence, jBPM uses hibernate internally.  Apart from traditional 
+    O/R mapping, hibernate also resolves the SQL dialect differences between the different 
+    databases, making jBPM portable across all current databases.</p><p>The JBoss jBPM API can be accessed from any custom java software in your 
+    project, like e.g. your web application, your EJB's, your web service components, 
+    your message driven beans or any other java component.</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch01s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch01.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch01s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The jBPM console web application&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;The JBoss jBPM identity component</td></tr></table></div></body></html>

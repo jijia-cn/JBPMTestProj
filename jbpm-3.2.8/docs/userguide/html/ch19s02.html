@@ -1,0 +1,33 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>XML sources</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch19.html" title="Chapter&nbsp;19.&nbsp;TDD for workflow"><link rel="prev" href="ch19.html" title="Chapter&nbsp;19.&nbsp;TDD for workflow"><link rel="next" href="ch19s03.html" title="Testing sub processes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">XML sources</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch19.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;19.&nbsp;TDD for workflow</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch19s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="xmlsources"></a>XML sources</h2></div></div></div><p>Before you can start writing execution scenario's, you need a 
+    <code class="literal">ProcessDefinition</code>.  The easiest way to get a 
+    <code class="literal">ProcessDefinition</code> object is by parsing xml. If you 
+    have code completion, type <code class="literal">ProcessDefinition.parse</code> 
+    and activate code completion.  Then you get the various parsing methods.  
+    There are basically 3 ways to write xml that can be parsed to a 
+    <code class="literal">ProcessDefinition</code> object:</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="parsingaprocessarchive"></a>Parsing a process archive</h3></div></div></div><p>A process archive is a zip file that contains the process xml 
+      in a file called <code class="literal">processdefinition.xml</code>.  The jBPM
+      process designer reads and writes process archives. For example:</p><pre class="programlisting">...
+static ProcessDefinition auctionProcess = 
+    ProcessDefinition.parseParResource("org/jbpm/tdd/auction.par");
+...</pre></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="parsinganxmlfile"></a>Parsing an xml file</h3></div></div></div><p>In other situations, you might want to write the 
+      processdefinition.xml file by hand and later package the zip file 
+      with e.g. an ant script.  In that case, you can use the 
+      <code class="literal">JpdlXmlReader</code></p><pre class="programlisting">...
+static ProcessDefinition auctionProcess = 
+    ProcessDefinition.parseXmlResource("org/jbpm/tdd/auction.xml");
+...</pre></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="parsinganxmlstring"></a>Parsing an xml String</h3></div></div></div><p>The simplest option is to parse the xml in the unit test 
+      inline from a plain String.</p><pre class="programlisting">...
+static ProcessDefinition auctionProcess = 
+    ProcessDefinition.parseXmlString(
+  "&lt;process-definition&gt;" + 
+  "  &lt;start-state name='start'&gt;" + 
+  "    &lt;transition to='auction'/&gt;" + 
+  "  &lt;/start-state&gt;" + 
+  "  &lt;state name='auction'&gt;" + 
+  "    &lt;transition to='end'/&gt;" + 
+  "  &lt;/state&gt;" + 
+  "  &lt;end-state name='end'/&gt;" + 
+  "&lt;/process-definition&gt;");
+...</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch19.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch19.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch19s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;19.&nbsp;TDD for workflow&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Testing sub processes</td></tr></table></div></body></html>

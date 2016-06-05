@@ -1,0 +1,41 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Calendar configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch14.html" title="Chapter&nbsp;14.&nbsp;Business calendar"><link rel="prev" href="ch14.html" title="Chapter&nbsp;14.&nbsp;Business calendar"><link rel="next" href="ch15.html" title="Chapter&nbsp;15.&nbsp;Email support"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Calendar configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch14.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;14.&nbsp;Business calendar</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch15.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="calendarconfiguration"></a>Calendar configuration</h2></div></div></div><p>The file
+    <code class="literal">org/jbpm/calendar/jbpm.business.calendar.properties</code>
+    specifies what business hours are. The configuration file can be
+    customized and a modified copy can be placed in the root of the
+    classpath.</p><p>This is the example business hour specification that is shipped by
+    default in <code class="literal">jbpm.business.calendar.properties</code>:</p><pre class="programlisting">hour.format=HH:mm
+#weekday ::= [&lt;daypart&gt; [&amp; &lt;daypart&gt;]*]
+#daypart ::= &lt;start-hour&gt;-&lt;to-hour&gt;
+#start-hour and to-hour must be in the hour.format
+#dayparts have to be ordered
+weekday.monday=    9:00-12:00 &amp; 12:30-17:00
+weekday.tuesday=   9:00-12:00 &amp; 12:30-17:00
+weekday.wednesday= 9:00-12:00 &amp; 12:30-17:00
+weekday.thursday=  9:00-12:00 &amp; 12:30-17:00
+weekday.friday=    9:00-12:00 &amp; 12:30-17:00
+weekday.saturday=
+weekday.sunday=
+
+day.format=dd/MM/yyyy
+# holiday syntax: &lt;holiday&gt;
+# holiday period syntax: &lt;start-day&gt;-&lt;end-day&gt;
+# below are the belgian official holidays
+holiday.1=  01/01/2005 # nieuwjaar
+holiday.2=  27/3/2005  # pasen 
+holiday.3=  28/3/2005  # paasmaandag 
+holiday.4=  1/5/2005   # feest van de arbeid
+holiday.5=  5/5/2005   # hemelvaart 
+holiday.6=  15/5/2005  # pinksteren 
+holiday.7=  16/5/2005  # pinkstermaandag 
+holiday.8=  21/7/2005  # my birthday 
+holiday.9=  15/8/2005  # moederkesdag 
+holiday.10= 1/11/2005  # allerheiligen 
+holiday.11= 11/11/2005 # wapenstilstand 
+holiday.12= 25/12/2005 # kerstmis 
+
+business.day.expressed.in.hours=             8
+business.week.expressed.in.hours=           40
+business.month.expressed.in.business.days=  21
+business.year.expressed.in.business.days=  220</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch14.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch14.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch15.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;14.&nbsp;Business calendar&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;15.&nbsp;Email support</td></tr></table></div></body></html>

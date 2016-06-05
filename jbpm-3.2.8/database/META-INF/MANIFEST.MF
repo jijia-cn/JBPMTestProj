@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: aguizar
+Build-Jdk: 1.6.0_0
+Implementation-Title: JBoss jBPM3 - Database
+Implementation-Version: 3.2.8
+Implementation-Vendor-Id: org.jbpm.jbpm3
+Implementation-Vendor: JBoss, a division of Red Hat
+

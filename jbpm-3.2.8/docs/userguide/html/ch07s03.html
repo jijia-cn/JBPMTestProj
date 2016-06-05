@@ -1,0 +1,20 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Starting hsqldb manager on JBoss</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch07.html" title="Chapter&nbsp;7.&nbsp;The jBPM Database"><link rel="prev" href="ch07s02.html" title="Database upgrades"><link rel="next" href="ch08.html" title="Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Starting hsqldb manager on JBoss</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;7.&nbsp;The jBPM Database</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch08.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e2006"></a>Starting hsqldb manager on JBoss</h2></div></div></div><p>Not really crucial for jBPM, but in some situations during
+    development, it can be convenient to open the hypersonic database manager
+    that gives you access to the data in the JBoss hypersonic database.</p><p>Start by opening a browser and navigating to the jBPM server JMX
+    console. The URL you should use in your browser for doing this is :
+    http://localhost:8080/jmx-console. Of course this will look slightly
+    different if you are running jBPM on another machine or on another port
+    than the default one. A screenshot of the resulting page is shown in the
+    figure below.</p><div class="figure"><a name="d0e2013"></a><p class="title"><b>Figure&nbsp;7.10.&nbsp;The JBoss JMX Console</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/jmx_console.jpg" alt="The JBoss JMX Console"></div></div></div><br class="figure-break"><p>If you click on the link 'database=jbpmDB,service=Hypersonic' under
+    the JBoss entries, you will see the JMX MBean view of the HSQLDB database
+    manager. Scrolling a bit down on this page, in the operations section, you
+    will see the 'startDatabaseManager()' operation. This is illustrated in
+    the screenshot below.</p><div class="figure"><a name="d0e2021"></a><p class="title"><b>Figure&nbsp;7.11.&nbsp;The HSQLDB MBean</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/hsqldb_mbean.jpg" alt="The HSQLDB MBean"></div></div></div><br class="figure-break"><p>Clicking the invoke button will start the HSQLDB Database Manager
+    application. This is a rather harsh database client tool, but it works ok
+    for our purposes of executing this generated script. You may have to
+    ALT-TAB to get to view this application as it may be covered by another
+    window. The figure below shows this application with the above script
+    loaded and ready to execute. Pushing the 'Execute SQL' button will execute
+    the script and effectively update your database.</p><div class="figure"><a name="d0e2029"></a><p class="title"><b>Figure&nbsp;7.12.&nbsp;The HSQLDB Database Manager</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/hsqldb_dbm.jpg" alt="The HSQLDB Database Manager"></div></div></div><br class="figure-break"></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch07.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch08.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Database upgrades&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</td></tr></table></div></body></html>

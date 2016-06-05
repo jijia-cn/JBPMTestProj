@@ -1,0 +1,33 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Database compatibility</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06s05.html" title="Customizing queries"><link rel="next" href="ch06s07.html" title="Combining your hibernate classes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Database compatibility</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s05.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="databasecompatibility"></a>Database compatibility</h2></div></div></div><p>jBPM runs on any database that is supported by hibernate.
+    </p><p>The example configuration files in jBPM (<code class="literal">src/config.files</code>) specify
+      the use of the hypersonic in-memory database.  That database is ideal during development and 
+      for testing.  The hypersonic in-memory database keeps all its data in memory and doesn't 
+      store it on disk.
+    </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="isolationlevelofthejdbcconnection"></a>Isolation level of the JDBC connection</h3></div></div></div><p>Make sure that the database isolation level that you configure for your 
+      JDBC connection is at least READ_COMMITTED.
+      </p><p>Almost all features run OK even with READ_UNCOMMITTED (isolation level 0
+      and the only isolation level supported by HSQLDB).  But race conditions might occur in the 
+      job executor and with synchronizing multiple tokens.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="changingthejbpmdb"></a>Changing the jBPM DB</h3></div></div></div><p>Following is an indicative list of things to do when changing jBPM to 
+        use a different database:
+      </p><div class="itemizedlist"><ul type="disc"><li>put the jdbc-driver library archive in the classpath
+        </li><li>update the hibernate configuration used by jBPM
+        </li><li>create the schema in the new database
+        </li></ul></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thejbpmdbschema"></a>The jBPM DB schema</h3></div></div></div><p>The jbpm.db subproject, contains a number of drivers, instructions and 
+        scripts to help you getting started on your database of choice.  Please, 
+        refer to the readme.html in the root of the jbpm.db project for more 
+        information.
+      </p><p>While jBPM is capable of generating DDL scripts for all database, these 
+        schemas are not always optimized.  So you might want to have your DBA review 
+        the DDL that is generated to optimize the column types and use of indexes.
+      </p><p>In development you might be interested in the following hibernate configuration:
+        If you set hibernate configuration property 'hibernate.hbm2ddl.auto' to 'create-drop' 
+        (e.g. in the hibernate.cfg.xml), the schema will be automatically created in the 
+        database the first time it is used in an application.  When the application closes 
+        down, the schema will be dropped.
+      </p><p>The schema generation can also be invoked programmatically with 
+        <code class="literal">jbpmConfiguration.createSchema()</code> and 
+        <code class="literal">jbpmConfiguration.dropSchema()</code>.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s05.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Customizing queries&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Combining your hibernate classes</td></tr></table></div></body></html>

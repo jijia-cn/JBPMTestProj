@@ -1,0 +1,52 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>The job executor</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch13.html" title="Chapter&nbsp;13.&nbsp;Asynchronous continuations"><link rel="prev" href="ch13s02.html" title="An example"><link rel="next" href="ch13s04.html" title="jBPM's built-in asynchronous messaging"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">The job executor</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;13.&nbsp;Asynchronous continuations</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch13s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="thejobexecutor"></a>The job executor</h2></div></div></div><p>The job executor is the component that resumes process executions asynchronously.
+      It waits for job messages to arrive over an asynchronous messaging system and executes 
+      them.  The two job messages used for asynchronous continuations are 
+      <code class="literal">ExecuteNodeJob</code> and <code class="literal">ExecuteActionJob</code>.
+    </p><p>These job messages are produced by the process execution.  During process execution, 
+      for each node or action that has to be executed asynchronously, a <code class="literal">Job</code>
+      (POJO) will be dispatched to the <code class="literal">MessageService</code>.  The message service 
+      is associated with the <code class="literal">JbpmContext</code> and it just collects all the 
+      messages that have to be sent.
+    </p><p>The messages will be sent as part of <code class="literal">JbpmContext.close()</code>.
+      That method cascades the <code class="literal">close()</code> invocation 
+      to all of the associated services.  The actual services can be configured in 
+      <code class="literal">jbpm.cfg.xml</code>.  One of the services, <code class="literal">DbMessageService</code>, is 
+      configured by default and will notify the job executor that new job messages are available.
+    </p><p>The graph execution mechanism uses the interfaces 
+      <code class="literal">MessageServiceFactory</code> and <code class="literal">MessageService</code> to 
+      send messages.  This is to make the asynchronous messaging service 
+      configurable (also in <code class="literal">jbpm.cfg.xml</code>). In Java EE environments, the 
+      <code class="literal">DbMessageService</code> can be replaced with the <code class="literal">JmsMessageService</code>
+      to leverage the application server's capabilities.
+    </p><p>Here's how the job executor works in a nutshell:
+    </p><p>Jobs are records in the database.  Jobs are objects and can be executed, too.  Both timers 
+    and async messages are jobs.  For async messages, the dueDate is simply set to the current time when they 
+    are inserted.  The job executor must execute the jobs.  This is done in 2 phases: 1) a job 
+    executor thread must acquire a job and 2) the thread that acquired the job must execute it.  
+    </p><p>Acquiring a job and executing the job are done in 2 separate transactions.  A thread 
+    acquires a job by putting its name into the owner field of the job.  Each thread has a unique 
+    name based on ip-address and sequence number.  Hibernate's optimistic locking is enabled on 
+    <code class="literal">Job</code>-objects.  So if 2 threads try to acquire a job concurrently, one of 
+    them will get a StaleObjectException and rollback.  Only the first one will succeed.  The 
+    thread that succeeds in acquiring a job is now responsible for executing it in a separate 
+    transaction.
+    </p><p>A thread could die between acquisition and execution of a job.  To clean-up after 
+    those situations, there is one lock-monitor thread per job executor that checks the lock times.  
+    Jobs that are locked for more then 30 mins (by default) will be unlocked so that they can be 
+    executed by another job.
+    </p><p>The required isolation level should be set to REPEATABLE_READ for hibernate's optimistic 
+    locking to work correctly.  That isolation level will guarantee that 
+    </p><pre class="programlisting">update JBPM_JOB job
+set job.version = 2
+    job.lockOwner = '192.168.1.3:2'
+where 
+    job.version = 1</pre><p>will only result in 1 row updated in exactly 1 of the competing transactions.
+    </p><p>Non-Repeatable Reads means that the following anomaly can happen: A transaction re-reads 
+    data it has previously read and finds that data has been modified by another transaction, one 
+    that has been committed since the transaction's previous read.
+    </p><p>Non-Repeatable reads are a problem for optimistic locking and therefore isolation level 
+    READ_COMMITTED is not enough cause it allows for Non-Repeatable reads to occur.  So 
+    REPEATABLE_READ is required if you configure more than one job executor thread.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch13s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch13.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch13s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">An example&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;jBPM's built-in asynchronous messaging</td></tr></table></div></body></html>

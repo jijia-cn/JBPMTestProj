@@ -1,0 +1,14 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Transient variables</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch10.html" title="Chapter&nbsp;10.&nbsp;Context"><link rel="prev" href="ch10s04.html" title="Variables scopes"><link rel="next" href="ch10s06.html" title="Customizing variable persistence"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Transient variables</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;10.&nbsp;Context</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch10s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="transientvariables"></a>Transient variables</h2></div></div></div><p>When a process instance is persisted in the database, normal variables 
+    are also persisted as part of the process instance.  In some situations 
+    you might want to use a variable in a delegation class, but you don't want 
+    to store it in the database.  An example could be a database connection that 
+    you want to pass from outside of jBPM to a delegation class.  This can be 
+    done with transient variables.
+    </p><p>The lifetime of transient variables is the same as the ProcessInstance 
+    java object.</p><p>Because of their nature, transient variables are not related to a token.
+    So there is only one map of transient variables for a process instance object.</p><p>The transient variables are accessable with their own set of methods
+    in the context instance, and don't need to be declared in the 
+    processdefinition.xml</p><pre class="programlisting">Object ContextInstance.getTransientVariable(String name);
+void ContextInstance.setTransientVariable(String name, Object value);</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch10.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch10s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Variables scopes&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Customizing variable persistence</td></tr></table></div></body></html>

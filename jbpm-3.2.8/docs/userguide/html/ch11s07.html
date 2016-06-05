@@ -1,0 +1,17 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Swimlane in start task</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s06.html" title="Swimlanes"><link rel="next" href="ch11s08.html" title="Task events"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Swimlane in start task</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s06.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s08.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="swimlaneinstarttask"></a>Swimlane in start task</h2></div></div></div><p>A swimlane can be associated with the start task to capture the process 
+    initiator.</p><p>A task can be specified in a start-state.  That task be associated with a 
+    swimlane.  When a new task instance is created for such a task, the current 
+    authenticated actor will be captured with 
+    <a href="ch18s02.html" title="Authentication">Authentication.getAuthenticatedActorId()</a>
+    and that actor will be stored in the swimlane of the start task.
+    </p><p>For example:</p><pre class="programlisting">&lt;process-definition&gt;
+  &lt;swimlane name='initiator' /&gt;
+  &lt;start-state&gt;
+    &lt;task swimlane='initiator' /&gt;
+    &lt;transition to='...' /&gt;
+  &lt;/start-state&gt;
+  ...
+&lt;/process-definition&gt;</pre><p>Also variables can be added to the start task as with any other task to 
+    define the form associated with the task.  See <a href="ch11s05.html" title="Task controllers">the section called &#8220;Task controllers&#8221;</a></p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s06.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s08.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Swimlanes&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Task events</td></tr></table></div></body></html>

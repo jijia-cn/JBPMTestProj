@@ -1,0 +1,35 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;14.&nbsp;Business calendar</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch13s04.html" title="jBPM's built-in asynchronous messaging"><link rel="next" href="ch14s02.html" title="Calendar configuration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;14.&nbsp;Business calendar</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch14s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="businesscalendar"></a>Chapter&nbsp;14.&nbsp;Business calendar</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch14.html#duedate">Duedate</a></span></dt><dd><dl><dt><span class="section"><a href="ch14.html#duration">Duration</a></span></dt><dt><span class="section"><a href="ch14.html#baseDate">Base date</a></span></dt><dt><span class="section"><a href="ch14.html#duedateExamples">Examples</a></span></dt></dl></dd><dt><span class="section"><a href="ch14s02.html">Calendar configuration</a></span></dt></dl></div><p>This chapter describes the business calendar of jBPM. The business
+  calendar knows about business hours and is used in calculation of due dates
+  for tasks and timers.</p><p>The business calendar is able to calculate a due date by adding a
+  duration to or subtracting it from a base date. If the base date is ommited,
+  the 'current' date is used.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="duedate"></a>Duedate</h2></div></div></div><p>As mentioned the due date is composed of a duration and a base date.
+    If this base date is ommitted, the duration is relative to the date (and
+    time) at the moment of calculating the duedate. The format is:</p><p><code class="literal">duedate ::= [&lt;basedate&gt; +/-]
+    &lt;duration&gt;</code></p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="duration"></a>Duration</h3></div></div></div><p>A duration is specified in absolute or in business hours. Let's
+      look at the syntax:</p><p><code class="literal">duration ::= &lt;quantity&gt; [business]
+      &lt;unit&gt;</code></p><p>Where <code class="literal">&lt;quantity&gt;</code> is a piece of text that
+      is parsable with Double.parseDouble(quantity).
+      <code class="literal">&lt;unit&gt;</code> is one of {second, seconds, minute,
+      minutes, hour, hours, day, days, week, weeks, month, months, year,
+      years}. And adding the optional indication <code class="literal">business</code>
+      means that only business hours should be taken into account for this
+      duration. Without the indication <code class="literal">business</code>, the
+      duration will be interpreted as an absolute time period.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="baseDate"></a>Base date</h3></div></div></div><p>A duration is specified in absolute or in business hours. Let's
+      look at the syntax:</p><p><code class="literal">basedate ::= &lt;EL&gt;</code></p><p>Where <code class="literal">&lt;EL&gt;</code> is any JAVA Expression
+      Language expression that resolves to a JAVA Date or Calendar object.
+      Referencing variable of other object types, even a String in a date
+      format like '2036-02-12', will throw a JbpmException</p><p>NOTE: This basedate is supported on the duedate attributes of a
+      plain timer, on the reminder of a task and the timer within a task. It
+      is <span class="bold"><strong>not</strong></span> supported on the repeat
+      attributes of these elements.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="duedateExamples"></a>Examples</h3></div></div></div><p>The following examples of the usage are all possible</p><pre class="programlisting">&lt;timer name="daysBeforeHoliday" duedate="5 business days"&gt;...&lt;/timer&gt;
+
+&lt;timer name="pensionDate" duedate="#{dateOfBirth} + 65 years" &gt;...&lt;/timer&gt;
+
+&lt;timer name="pensionReminder" duedate="#{dateOfPension} - 1 year" &gt;...&lt;/timer&gt;
+
+&lt;timer name="fireWorks" duedate="#{chineseNewYear} repeat="1 year" &gt;...&lt;/timer&gt;
+
+&lt;reminder name="hitBoss" duedate="#{payRaiseDay} + 3 days" repeat="1 week" /&gt;
+</pre></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch13s04.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch14s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">jBPM's built-in asynchronous messaging&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Calendar configuration</td></tr></table></div></body></html>

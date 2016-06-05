@@ -1,0 +1,19 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Expressions</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch17.html" title="Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)"><link rel="prev" href="ch17s02.html" title="Delegation"><link rel="next" href="ch17s04.html" title="jPDL xml schema"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Expressions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch17s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch17s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="expressions"></a>Expressions</h2></div></div></div><p>For some of the delegations, there is support for a JSP/JSF EL like expression 
+      language.  In actions, assignments and decision conditions, you can write an 
+      expression like e.g. <code class="literal">expression="#{myVar.handler[assignments].assign}"</code>
+    </p><p>The basics of this expression language can be found 
+      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/j2ee/1.4/docs/tutorial/doc/JSPIntro7.html" target="_top">in the J2EE 
+      tutorial</a>.  
+    </p><p>The jPDL expression language is similar to the JSF expression language.  Meaning that 
+      jPDL EL is based on JSP EL, but it uses <code class="literal">#{...}</code> notation and that it 
+      includes support for method binding.  
+    </p><p>Depending on the context, the process variables or task instance variables can 
+      be used as starting variables along with the following implicit objects:
+    </p><div class="itemizedlist"><ul type="disc"><li>taskInstance (org.jbpm.taskmgmt.exe.TaskInstance)</li><li>processInstance (org.jbpm.graph.exe.ProcessInstance)</li><li>processDefinition (org.jbpm.graph.def.ProcessDefinition)</li><li>token (org.jbpm.graph.exe.Token)</li><li>taskMgmtInstance (org.jbpm.taskmgmt.exe.TaskMgmtInstance)</li><li>contextInstance (org.jbpm.context.exe.ContextInstance)</li></ul></div><p>This feature becomes really powerfull in a JBoss SEAM environment.  
+      Because of the integration between jBPM and 
+      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jboss.com/products/seam" target="_top">JBoss SEAM</a>, all of your backed 
+      beans, EJB's and other <code class="literal">one-kind-of-stuff</code> becomes available right 
+      inside of your process definition.  Thanks Gavin ! Absolutely awsome ! :-)
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch17s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch17.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch17s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Delegation&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;jPDL xml schema</td></tr></table></div></body></html>

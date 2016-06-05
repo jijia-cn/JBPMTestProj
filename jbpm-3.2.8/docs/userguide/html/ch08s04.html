@@ -1,0 +1,136 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Client Components</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch08.html" title="Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities"><link rel="prev" href="ch08s03.html" title="Hibernate Enterprise Configuration"><link rel="next" href="ch09.html" title="Chapter&nbsp;9.&nbsp;Process Modelling"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Client Components</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch09.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="clientcomponents"></a>Client Components</h2></div></div></div><p>Client components written directly against the jBPM APIs that wish to leverage the
+    enterprise services must ensure that their deployment descriptors have the appropriate
+    environment references in place. The descriptor below can be regarded as typical for
+    a client session bean.
+    </p><pre class="programlisting">&lt;session&gt;
+
+  &lt;ejb-name&gt;MyClientBean&lt;/ejb-name&gt;
+  &lt;home&gt;org.example.RemoteClientHome&lt;/home&gt;
+  &lt;remote&gt;org.example.RemoteClient&lt;/remote&gt;
+  &lt;local-home&gt;org.example.LocalClientHome&lt;/local-home&gt;
+  &lt;local&gt;org.example.LocalClient&lt;/local&gt;
+  &lt;ejb-class&gt;org.example.ClientBean&lt;/ejb-class&gt;
+  &lt;session-type&gt;Stateless&lt;/session-type&gt;
+  &lt;transaction-type&gt;Container&lt;/transaction-type&gt;
+
+  &lt;ejb-local-ref&gt;
+    &lt;ejb-ref-name&gt;ejb/TimerEntityBean&lt;/ejb-ref-name&gt;
+    &lt;ejb-ref-type&gt;Entity&lt;/ejb-ref-type&gt;
+    &lt;local-home&gt;org.jbpm.ejb.LocalTimerEntityHome&lt;/local-home&gt;
+    &lt;local&gt;org.jbpm.ejb.LocalTimerEntity&lt;/local&gt;
+  &lt;/ejb-local-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jdbc/JbpmDataSource&lt;/res-ref-name&gt;
+    &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;
+    &lt;res-auth&gt;Container&lt;/res-auth&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jms/JbpmConnectionFactory&lt;/res-ref-name&gt;
+    &lt;res-type&gt;javax.jms.ConnnectionFactory&lt;/res-type&gt;
+    &lt;res-auth&gt;Container&lt;/res-auth&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;message-destination-ref&gt;
+    &lt;message-destination-ref-name&gt;jms/JobQueue&lt;/message-destination-ref-name&gt;
+    &lt;message-destination-type&gt;javax.jms.Queue&lt;/message-destination-type&gt;
+    &lt;message-destination-usage&gt;Produces&lt;/message-destination-usage&gt;
+  &lt;/message-destination-ref&gt;
+
+&lt;/session&gt;</pre><p>Provided the target application server was JBoss, the above environment references
+    could be bound to resources in the target operational environment as follows. Note that 
+    the JNDI names match the values used by the jBPM enterprise beans.
+    </p><pre class="programlisting">&lt;session&gt;
+
+  &lt;ejb-name&gt;MyClientBean&lt;/ejb-name&gt;
+  &lt;jndi-name&gt;ejb/MyClientBean&lt;/jndi-name&gt;
+  &lt;local-jndi-name&gt;java:ejb/MyClientBean&lt;/local-jndi-name&gt;
+
+  &lt;ejb-local-ref&gt;
+    &lt;ejb-ref-name&gt;ejb/TimerEntityBean&lt;/ejb-ref-name&gt;
+    &lt;local-jndi-name&gt;java:ejb/TimerEntityBean&lt;/local-jndi-name&gt;
+  &lt;/ejb-local-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jdbc/JbpmDataSource&lt;/res-ref-name&gt;
+    &lt;jndi-name&gt;java:JbpmDS&lt;/jndi-name&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jms/JbpmConnectionFactory&lt;/res-ref-name&gt;
+    &lt;jndi-name&gt;java:JmsXA&lt;/jndi-name&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;message-destination-ref&gt;
+    &lt;message-destination-ref-name&gt;jms/JobQueue&lt;/message-destination-ref-name&gt;
+    &lt;jndi-name&gt;queue/JbpmJobQueue&lt;/jndi-name&gt;
+  &lt;/message-destination-ref&gt;
+
+&lt;/session&gt;</pre><p>In case the client component is a web application, as opposed to an enterprise bean,
+    the deployment descriptor would look like this:</p><pre class="programlisting">&lt;web-app&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;MyClientServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.example.ClientServlet&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;MyClientServlet&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/client/servlet&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;ejb-local-ref&gt;
+    &lt;ejb-ref-name&gt;ejb/TimerEntityBean&lt;/ejb-ref-name&gt;
+    &lt;ejb-ref-type&gt;Entity&lt;/ejb-ref-type&gt;
+    &lt;local-home&gt;org.jbpm.ejb.LocalTimerEntityHome&lt;/local-home&gt;
+    &lt;local&gt;org.jbpm.ejb.LocalTimerEntity&lt;/local&gt;
+    &lt;ejb-link&gt;TimerEntityBean&lt;/ejb-link&gt;
+  &lt;/ejb-local-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jdbc/JbpmDataSource&lt;/res-ref-name&gt;
+    &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;
+    &lt;res-auth&gt;Container&lt;/res-auth&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jms/JbpmConnectionFactory&lt;/res-ref-name&gt;
+    &lt;res-type&gt;javax.jms.ConnectionFactory&lt;/res-type&gt;
+    &lt;res-auth&gt;Container&lt;/res-auth&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;message-destination-ref&gt;
+    &lt;message-destination-ref-name&gt;jms/JobQueue&lt;/message-destination-ref-name&gt;
+    &lt;message-destination-type&gt;javax.jms.Queue&lt;/message-destination-type&gt;
+    &lt;message-destination-usage&gt;Produces&lt;/message-destination-usage&gt;
+    &lt;message-destination-link&gt;JobQueue&lt;/message-destination-link&gt;
+  &lt;/message-destination-ref&gt;
+
+&lt;/web-app&gt;</pre><p>The above environment references could be bound to resources in the target 
+    operational environment as follows, if the target application server was JBoss.
+    </p><pre class="programlisting">&lt;jboss-web&gt;
+
+  &lt;ejb-local-ref&gt;
+    &lt;ejb-ref-name&gt;ejb/TimerEntityBean&lt;/ejb-ref-name&gt;
+    &lt;local-jndi-name&gt;java:ejb/TimerEntityBean&lt;/local-jndi-name&gt;
+  &lt;/ejb-local-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jdbc/JbpmDataSource&lt;/res-ref-name&gt;
+    &lt;jndi-name&gt;java:JbpmDS&lt;/jndi-name&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;resource-ref&gt;
+    &lt;res-ref-name&gt;jms/JbpmConnectionFactory&lt;/res-ref-name&gt;
+    &lt;jndi-name&gt;java:JmsXA&lt;/jndi-name&gt;
+  &lt;/resource-ref&gt;
+
+  &lt;message-destination-ref&gt;
+    &lt;message-destination-ref-name&gt;jms/JobQueue&lt;/message-destination-ref-name&gt;
+    &lt;jndi-name&gt;queue/JbpmJobQueue&lt;/jndi-name&gt;
+  &lt;/message-destination-ref&gt;
+
+&lt;/jboss-web&gt;</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch08.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch09.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Hibernate Enterprise Configuration&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;9.&nbsp;Process Modelling</td></tr></table></div></body></html>

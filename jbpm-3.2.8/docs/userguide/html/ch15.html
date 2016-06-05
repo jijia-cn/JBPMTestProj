@@ -1,0 +1,47 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;15.&nbsp;Email support</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch14s02.html" title="Calendar configuration"><link rel="next" href="ch15s02.html" title="Expressions in mails"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;15.&nbsp;Email support</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch14s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch15s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="mail"></a>Chapter&nbsp;15.&nbsp;Email support</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch15.html#mailinjpdl">Mail in jPDL</a></span></dt><dd><dl><dt><span class="section"><a href="ch15.html#mailaction">Mail action</a></span></dt><dt><span class="section"><a href="ch15.html#mailnode">Mail node</a></span></dt><dt><span class="section"><a href="ch15.html#taskassignmails">Task assign mails</a></span></dt><dt><span class="section"><a href="ch15.html#taskremindermails">Task reminder mails</a></span></dt></dl></dd><dt><span class="section"><a href="ch15s02.html">Expressions in mails</a></span></dt><dt><span class="section"><a href="ch15s03.html">Specifying mail recipients</a></span></dt><dd><dl><dt><span class="section"><a href="ch15s03.html#multiplerecipients">Multiple recipients</a></span></dt><dt><span class="section"><a href="ch15s03.html#BCC">Sending Mails to a BCC target</a></span></dt><dt><span class="section"><a href="ch15s03.html#addressresolving">Address resolving</a></span></dt></dl></dd><dt><span class="section"><a href="ch15s04.html">Mail templates</a></span></dt><dt><span class="section"><a href="ch15s05.html">Mail server configuration</a></span></dt><dt><span class="section"><a href="ch15s06.html">From address configuration</a></span></dt><dt><span class="section"><a href="ch15s07.html">Customizing mail support</a></span></dt><dt><span class="section"><a href="ch15s08.html">Mail server</a></span></dt></dl></div><p>This chapter describes the out-of-the-box email support in jBPM jPDL.
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="mailinjpdl"></a>Mail in jPDL</h2></div></div></div><p>There are four ways of specifying when emails should be sent from a process.
+    </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="mailaction"></a>Mail action</h3></div></div></div><p>A mail action can be used when the sending of this email should <span class="bold"><strong>not</strong></span>
+      be shown as a node in the process graph.
+      </p><p>Anywhere you are allowed to specify actions in the process, you can specify a mail action 
+      like this:
+      </p><pre class="programlisting">&lt;<span class="bold"><strong>mail</strong></span> actors="#{president}" subject="readmylips" text="nomoretaxes" /&gt;</pre><p>The subject and text attributes can also be specified as an element like this:</p><pre class="programlisting">&lt;mail actors="#{president}" &gt;
+  &lt;subject&gt;readmylips&lt;/subject&gt;
+  &lt;text&gt;nomoretaxes&lt;/text&gt;
+&lt;/mail&gt;
+      </pre><p>Each of the fields can contain JSF like expressions.  For example:
+      </p><pre class="programlisting">&lt;mail to='#{initiator}' subject='websale' text='your websale of #{quantity} #{item} was approved' /&gt;</pre><p>For more information about expressions, see <a href="ch17s03.html" title="Expressions">the section called &#8220;Expressions&#8221;</a>.
+      </p><p>There are two attribute to specify recipients: <code class="literal">actors</code> and 
+      <code class="literal">to</code>.  The <code class="literal">to</code> attribute should resolve to a semicolon
+      separated list of email addresses.  The <code class="literal">actors</code> attribute should resolve to a 
+      semicolon separated list of actorIds. Those actorIds will be resolved to email addresses with by 
+      means of <a href="ch15s03.html#addressresolving" title="Address resolving">address resolving</a>.
+      </p><pre class="programlisting">&lt;mail to='admin@mycompany.com' subject='urgent' text='the mailserver is down :-)' /&gt;</pre><p>For more about how to specify recipients, see <a href="ch15s03.html" title="Specifying mail recipients">the section called &#8220;Specifying mail recipients&#8221;</a></p><p>Mails can be defined in templates and in the process you can overwrite properties of the 
+      templates like this:
+      </p><pre class="programlisting">&lt;mail template='sillystatement' actors="#{president}" /&gt;</pre><p>More about templates can be found in <a href="ch15s04.html" title="Mail templates">the section called &#8220;Mail templates&#8221;</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="mailnode"></a>Mail node</h3></div></div></div><p>Just the same as with mail actions, sending of an email can also be modelled as a node.
+        In that case, the runtime behaviour is just the same, but the email will show up as a node 
+        in the process graph.
+      </p><p>The attributes and elements supported by mail nodes are exactly the same as with 
+      the <a href="ch15.html#mailaction" title="Mail action">mail actions</a>.
+      </p><pre class="programlisting">&lt;<span class="bold"><strong>mail-node</strong></span> name="send email" to="#{president}" subject="readmylips" text="nomoretaxes"&gt;
+  &lt;transition to="the next node" /&gt;
+&lt;/<span class="bold"><strong>mail-node</strong></span>&gt;</pre><p>Mail nodes should have exactly one leaving transition.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="taskassignmails"></a>Task assign mails</h3></div></div></div><p>A notification email can be send when a task gets assigned to an actor.  Just use 
+      the <code class="literal">notify="yes"</code> attribute on a task like this:
+      </p><pre class="programlisting">&lt;task-node name='a'&gt;
+  &lt;task name='laundry' swimlane="grandma" <span class="bold"><strong>notify='yes'</strong></span> /&gt;
+  &lt;transition to='b' /&gt;
+&lt;/task-node&gt;
+</pre><p>Setting notify to yes, true or on will cause jBPM to send an email to 
+      the actor that will be assigned to this task.  The email is based on a template (see 
+      <a href="ch15s04.html" title="Mail templates">the section called &#8220;Mail templates&#8221;</a>) and contains a link to the task page of the web application.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="taskremindermails"></a>Task reminder mails</h3></div></div></div><p>Similarly as with assignments, emails can be send as a task reminder. The <code class="literal">reminder</code> 
+      element in jPDL is based upon the timer.  The most common attributes will be the <code class="literal">duedate</code> 
+      and the <code class="literal">repeat</code>. The only difference is that no action has to be specified.
+      </p><pre class="programlisting">&lt;task-node name='a'&gt;
+  &lt;task name='laundry' swimlane="grandma" notify='yes'&gt;
+    <span class="bold"><strong>&lt;reminder duedate="2 business days" repeat="2 business hours"/&gt;</strong></span>
+  &lt;/task&gt;
+  &lt;transition to='b' /&gt;
+&lt;/task-node&gt;
+</pre></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch14s02.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch15s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Calendar configuration&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Expressions in mails</td></tr></table></div></body></html>

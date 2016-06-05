@@ -1,0 +1,58 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Hibernate Enterprise Configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch08.html" title="Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities"><link rel="prev" href="ch08s02.html" title="jBPM Enterprise Configuration"><link rel="next" href="ch08s04.html" title="Client Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Hibernate Enterprise Configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch08s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="enterprisehibernateconfig"></a>Hibernate Enterprise Configuration</h2></div></div></div><p><code class="literal">hibernate.cfg.xml</code> includes the following configuration items that may
+    be modified to support other databases or application servers.
+    </p><pre class="programlisting">&lt;!-- sql dialect --&gt;
+&lt;property name="hibernate.dialect"&gt;org.hibernate.dialect.HSQLDialect&lt;/property&gt;
+
+&lt;property name="hibernate.cache.provider_class"&gt;
+  org.hibernate.cache.HashtableCacheProvider
+&lt;/property&gt;
+
+&lt;!-- DataSource properties (begin) --&gt;
+&lt;property name="hibernate.connection.datasource"&gt;java:comp/env/jdbc/JbpmDataSource&lt;/property&gt;
+&lt;!-- DataSource properties (end) --&gt;
+
+&lt;!-- JTA transaction properties (begin) --&gt;
+&lt;property name="hibernate.transaction.factory_class"&gt;
+  org.hibernate.transaction.JTATransactionFactory
+&lt;/property&gt;
+&lt;property name="hibernate.transaction.manager_lookup_class"&gt;
+  org.hibernate.transaction.JBossTransactionManagerLookup
+&lt;/property&gt;
+&lt;!-- JTA transaction properties (end) --&gt;
+
+&lt;!-- CMT transaction properties (begin) ===
+&lt;property name="hibernate.transaction.factory_class"&gt;
+  org.hibernate.transaction.CMTTransactionFactory
+&lt;/property&gt;
+&lt;property name="hibernate.transaction.manager_lookup_class"&gt;
+  org.hibernate.transaction.JBossTransactionManagerLookup
+&lt;/property&gt;
+==== CMT transaction properties (end) --&gt;</pre><p>You may replace the <code class="literal">hibernate.dialect</code> with one that corresponds to your 
+    database management system. The Hibernate reference guide enumerates the available database 
+    dialects in section <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html/session-configuration.html#configuration-optional-dialects" target="_top">
+    3.4.1 SQL dialects</a>.
+    </p><p><code class="literal">HashtableCacheProvider</code> can be replaced with other 
+    supported cache providers. Refer to section <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html/performance.html#performance-cache" target="_top">
+    19.2 The second level cache</a> of the Hibernate manual for a list of the 
+    supported cache providers.
+    </p><p>The <code class="literal">JBossTransactionManagerLookup</code> may be replaced with a strategy 
+    appropriate to applications servers other than JBoss. See section <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html/session-configuration.html#configuration-optional-transactionstrategy" target="_top">
+    3.8.1 Transaction strategy configuration</a> to find the lookup class that
+    corresponds to each application server. 
+    </p><p>Note that the JNDI name used in <code class="literal">hibernate.connection.datasource</code>
+    is, in fact, a resource manager reference, portable across application servers. Said
+    reference is meant to be bound to an actual data source in the target application server
+    at deployment time. In the included <code class="code">jboss.xml</code> descriptor, the reference is
+    bound to <code class="code">java:JbpmDS</code>.
+    </p><p>Out of the box, jBPM is configured to use the <code class="literal">JTATransactionFactory</code>. 
+    If an existing transaction is underway, the JTA transaction factory uses it; otherwise it
+    creates a new transaction. The jBPM enterprise beans are configured to delegate transaction
+    management to the container. However, if you use the jBPM APIs in a context where no 
+    transaction is active (say, in a web application), one will be started automatically.
+    </p><p>If your own EJBs use container-managed transactions and you want to prevent unintended
+    transaction creations, you can switch to the <code class="literal">CMTTransactionFactory</code>. With
+    that setting, Hibernate will always look for an existing transaction and will report a problem
+    if none is found.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch08.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch08s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">jBPM Enterprise Configuration&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Client Components</td></tr></table></div></body></html>

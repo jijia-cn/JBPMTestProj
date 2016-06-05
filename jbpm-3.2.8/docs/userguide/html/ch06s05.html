@@ -1,0 +1,15 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Customizing queries</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06s04.html" title="JTA transactions"><link rel="next" href="ch06s06.html" title="Database compatibility"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Customizing queries</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customizingqueries"></a>Customizing queries</h2></div></div></div><p>All the HQL queries that jBPM uses are centralized in one configuration file.
+      That resource file is referenced in the hibernate.cfg.xml configuration file
+      like this:
+    </p><pre class="programlisting">&lt;hibernate-configuration&gt;
+  ...
+    &lt;!-- hql queries and type defs --&gt;
+    &lt;mapping resource="org/jbpm/db/hibernate.queries.hbm.xml" /&gt;
+  ...
+&lt;/hibernate-configuration&gt;</pre><p>To customize one or more of those queries, take a copy of the original file 
+      and put your customized version somewhere on the classpath.  Then update the 
+      reference 'org/jbpm/db/hibernate.queries.hbm.xml' in the hibernate.cfg.xml to point to your 
+      customized version.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">JTA transactions&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Database compatibility</td></tr></table></div></body></html>

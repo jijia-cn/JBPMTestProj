@@ -1,0 +1,61 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Task controllers</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s04.html" title="Task instance variables"><link rel="next" href="ch11s06.html" title="Swimlanes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Task controllers</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="taskcontrollers"></a>Task controllers</h2></div></div></div><p>At creation of a task instance, the task controllers can populate the task instance variables 
+      and when the task instance is finished, the task controller can submit the data of the 
+      task instance into the process variables.
+    </p><p>Note that you are not forced to use task controllers.  Task instances also are able 
+      to 'see' the process variables related to its token.  Use task controllers when you want 
+      to:
+    </p><div class="itemizedlist"><ul type="disc"><li>a) create copies of variables in the task instances so that intermediate updates 
+        to the task instance variables don't affect the process variables untill the process 
+        is finished and the copies are submitted back into the process variables.
+      </li><li>b) the task instance variables do not relate one-on-one with the process variables.
+        E.g. suppose the process has variables 'sales in januari' 'sales in februari' and 'sales in march'.
+        Then the form for the task instance might need to show the average sales in the 3 months.
+      </li></ul></div><p>Tasks are intended to collect input from users.  But there are many user interfaces
+      which could be used to present the tasks to the users. E.g. a web application, a swing application,
+      an instant messenger, an email form,...  So the task controllers make the bridge between the 
+      process variables (=process context) and the user interface application.  The task controllers 
+      provide a view of process variables to the user interface application.
+    </p><p>The task controller makes the translation (if any) from the process variables to the 
+      task variables.  When a task instance is created, the task controller is responsible for extracting 
+      information from the process variables and creating the task variables.  The task variables serve 
+      as the input for the user interface form.  And the user input can be stored in the task variables.
+      When the user ends the task, the task controller is responsible for updating the process 
+      variables based on the task instance data.
+    </p><div class="figure"><a name="task.controllers.image"></a><p class="title"><b>Figure&nbsp;11.2.&nbsp;The task controllers</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/task.controllers.jpg" align="middle" alt="The task controllers"></div></div></div><br class="figure-break"><p>In a simple scenario, there is a one-on-one mapping between process variables and the 
+      form parameters.  Task controllers are specified in a task element.  
+      In this case, the default jBPM task controller can be used and it takes a list of 
+      <code class="literal">variable</code> elements inside.  The variable elements express 
+      how the process variables are copied in the task variables.
+    </p><p>The next example shows how you can create separate task instance variable copies
+      based on the process variables:
+    </p><pre class="programlisting">&lt;task name="clean ceiling"&gt;
+  &lt;controller&gt;
+    &lt;variable name="a" access="read" mapped-name="x" /&gt;
+    &lt;variable name="b" access="read,write,required" mapped-name="y" /&gt;
+    &lt;variable name="c" access="read,write" /&gt;
+  &lt;/controller&gt;
+&lt;/task&gt;</pre><p>The <code class="literal">name</code> attribute refers to the name of the process variable.  
+      The <code class="literal">mapped-name</code> is optional and refers to the name of the task instance 
+      variable.  If the mapped-name attribute is omitted, mapped-name defaults to the name.
+      Note that the mapped-name also is used as the label for the fields in the task instance 
+      form of the web application.
+    </p><p>
+      The <code class="literal">access</code> attribute specifies if the variable is copied at task instance
+      creation, will be written back to the process variables at task end and wether it is 
+      required. This information can be used by the user interface to generate the proper
+      form controls.  The access attribute is optional and the default 
+      access is 'read,write'. 
+    </p><p>A <code class="literal">task-node</code> can have many tasks and a <code class="literal">start-state</code> can have 
+      1 task.
+    </p><p>If the simple one-to-one mapping between process variables and form parameters is too limiting, you 
+      can also write your own TaskControllerHandler implementation.  Here's the TaskControllerHandler interface:
+    </p><pre class="programlisting">public interface TaskControllerHandler extends Serializable {
+  void initializeTaskVariables(TaskInstance taskInstance, ContextInstance contextInstance, Token token);
+  void submitTaskVariables(TaskInstance taskInstance, ContextInstance contextInstance, Token token);
+}</pre><p>And here's how to configure your custom task controller implementation in a task:</p><pre class="programlisting">&lt;task name="clean ceiling"&gt;
+  &lt;controller class="com.yourcom.CleanCeilingTaskControllerHandler"&gt;
+    -- here goes your task controller handler configuration --
+  &lt;/controller&gt;
+&lt;/task&gt;</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Task instance variables&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Swimlanes</td></tr></table></div></body></html>

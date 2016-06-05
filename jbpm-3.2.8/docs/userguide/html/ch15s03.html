@@ -1,0 +1,34 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Specifying mail recipients</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch15.html" title="Chapter&nbsp;15.&nbsp;Email support"><link rel="prev" href="ch15s02.html" title="Expressions in mails"><link rel="next" href="ch15s04.html" title="Mail templates"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Specifying mail recipients</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch15s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;15.&nbsp;Email support</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch15s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="specifyingmailrecipients"></a>Specifying mail recipients</h2></div></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="multiplerecipients"></a>Multiple recipients</h3></div></div></div><p>In the <code class="literal">actors</code> and <code class="literal">to</code> fields, multiple recipients 
+      can be separated with a semi colon (;) or a colon (:).</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="BCC"></a>Sending Mails to a BCC target</h3></div></div></div><p>Sometimes you want to send emails to a BCC target in addition to the normal receipient.
+      Currently, there are two supported ways of doing that: First you can specify an <code class="literal">bccActors</code> 
+      or <code class="literal">bcc</code> attribute (according to <code class="literal">actors</code> and <code class="literal">to</code>) in the process definition.
+      </p><pre class="programlisting">&lt;mail to='#{initiator}' bcc='bcc@mycompany.com' subject='websale' text='your websale of #{quantity} #{item} was approved' /&gt;</pre><p>
+      
+      
+      The second way is to always send an BCC Mail to some location you can configure in the central configuration (jbpm.cfg.xml) in a property:
+          </p><pre class="programlisting">&lt;jbpm-configuration&gt;
+  ...
+  <span class="bold"><strong>&lt;string name="jbpm.mail.bcc.address" value="bcc@mycompany.com" /&gt;</strong></span>
+&lt;/jbpm-configuration&gt;</pre><p>
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="addressresolving"></a>Address resolving</h3></div></div></div><p>In all of jBPM, actors are referenced by actorId's.  This is a string that servers as the identifier 
+      of the process participant.   An address resolver translates actorId's into email addresses.
+      </p><p>Use the attribute <span class="bold"><strong>actors</strong></span> in case you want to apply address resolving 
+      and use the attribute <span class="bold"><strong>to</strong></span> in case you are specifying email addresses 
+      directly and don't want to apply address resolving.
+      </p><p>An address resolver should implement the following interface:
+      </p><pre class="programlisting">public interface AddressResolver extends Serializable {
+  Object resolveAddress(String actorId);
+}</pre><p>An address resolver should return 1 of 3 types: a String, a Collection of Strings or an array
+      of Strings.  All strings should represent email addresses for the given actorId.
+      </p><p>The address resolver implementation should be a bean configured in the jbpm.cfg.xml with 
+      name <code class="literal">jbpm.mail.address.resolver</code> like this:
+      </p><pre class="programlisting">&lt;jbpm-configuration&gt;
+  ...
+  <span class="bold"><strong>&lt;bean name='jbpm.mail.address.resolver' class='org.jbpm.identity.mail.IdentityAddressResolver' singleton='true' /&gt;</strong></span>
+&lt;/jbpm-configuration&gt;
+      </pre><p>The identity component of jBPM includes an address resolver.  That address resolver 
+      will look for the User of the given actorId.  If the user exists, the user's email is returned,
+      otherwise null.  More on the identity component can be found in <a href="ch11s11.html" title="The identity component">the section called &#8220;The identity component&#8221;</a>.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch15s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch15.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch15s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Expressions in mails&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Mail templates</td></tr></table></div></body></html>

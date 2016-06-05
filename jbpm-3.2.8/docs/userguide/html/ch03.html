@@ -1,0 +1,71 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;3.&nbsp;Tutorial</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch02s02.html" title="The JBoss jBPM cummunity page"><link rel="next" href="ch03s02.html" title="Database example"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;3.&nbsp;Tutorial</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch02s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="tutorial"></a>Chapter&nbsp;3.&nbsp;Tutorial</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch03.html#helloworldexample">Hello World example</a></span></dt><dt><span class="section"><a href="ch03s02.html">Database example</a></span></dt><dt><span class="section"><a href="ch03s03.html">Context example: process variables</a></span></dt><dt><span class="section"><a href="ch03s04.html">Task assignment example</a></span></dt><dt><span class="section"><a href="ch03s05.html">Custom action example</a></span></dt></dl></div><p>This tutorial will show you basic process constructs in jpdl and 
+  the usage of the API for managing the runtime executions.</p><p>The format of this tutorial is explaining a set of examples.
+  The examples focus on a particular topic and contain extensive 
+  comments.  The examples can also be fond in the jBPM download package 
+  in the directory <code class="literal">src/java.examples</code>.</p><p>The best way to learn is to create a project and experiment 
+  by creating variations on the examples given.</p><p>To get started first, <a href="ch02.html#downloadingandinstallingjbpm" title="Downloading and installing jBPM">
+  download and install</a> jBPM.</p><p>jBPM includes a graphical designer tool for authoring the 
+  XML that is shown in the examples.  You can find download instructions 
+  for the graphical designer in <a href="">???</a>.
+  You don't need the graphical designer tool to complete this tutorial.
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="helloworldexample"></a>Hello World example</h2></div></div></div><p>A process definition is a directed graph, made up of nodes and 
+    transitions.  The hello world process has 3 nodes. To see how the pieces fit 
+    together, we're going to start with a  simple process without the use of the 
+    designer tool.  The following picture shows the graphical representation of 
+    the hello world process:
+    </p><div class="figure"><a name="hello.world.image"></a><p class="title"><b>Figure&nbsp;3.1.&nbsp;The hello world process graph</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/hello.world.gif" align="middle" alt="The hello world process graph"></div></div></div><br class="figure-break"><pre class="programlisting">public void testHelloWorldProcess() {
+  <span class="bold"><strong>// This method shows a process definition and one execution</strong></span>
+  <span class="bold"><strong>// of the process definition.  The process definition has </strong></span>
+  <span class="bold"><strong>// 3 nodes: an unnamed start-state, a state 's' and an </strong></span>
+  <span class="bold"><strong>// end-state named 'end'.</strong></span>
+  <span class="bold"><strong>// The next line parses a piece of xml text into a</strong></span>
+  <span class="bold"><strong>// ProcessDefinition.  A ProcessDefinition is the formal </strong></span>
+  <span class="bold"><strong>// description of a process represented as a java object.</strong></span>
+  ProcessDefinition processDefinition = ProcessDefinition.parseXmlString(
+    "<span class="bold"><strong>&lt;process-definition&gt;</strong></span>" +
+    "<span class="bold"><strong>  &lt;start-state&gt;</strong></span>" +
+    "<span class="bold"><strong>    &lt;transition to='s' /&gt;</strong></span>" +
+    "<span class="bold"><strong>  &lt;/start-state&gt;</strong></span>" +
+    "<span class="bold"><strong>  &lt;state name='s'&gt;</strong></span>" +
+    "<span class="bold"><strong>    &lt;transition to='end' /&gt;</strong></span>" +
+    "<span class="bold"><strong>  &lt;/state&gt;</strong></span>" +
+    "<span class="bold"><strong>  &lt;end-state name='end' /&gt;</strong></span>" +
+    "<span class="bold"><strong>&lt;/process-definition&gt;</strong></span>"
+  );
+  
+  <span class="bold"><strong>// The next line creates one execution of the process definition.</strong></span>
+  <span class="bold"><strong>// After construction, the process execution has one main path</strong></span>
+  <span class="bold"><strong>// of execution (=the root token) that is positioned in the</strong></span>
+  <span class="bold"><strong>// start-state.</strong></span>
+  ProcessInstance processInstance = 
+      new ProcessInstance(processDefinition);
+  
+  <span class="bold"><strong>// After construction, the process execution has one main path</strong></span>
+  <span class="bold"><strong>// of execution (=the root token).</strong></span>
+  Token token = processInstance.getRootToken();
+  
+  <span class="bold"><strong>// Also after construction, the main path of execution is positioned</strong></span>
+  <span class="bold"><strong>// in the start-state of the process definition.</strong></span>
+  assertSame(processDefinition.getStartState(), token.getNode());
+  
+  <span class="bold"><strong>// Let's start the process execution, leaving the start-state </strong></span>
+  <span class="bold"><strong>// over its default transition.</strong></span>
+  token.signal();
+  <span class="bold"><strong>// The signal method will block until the process execution </strong></span>
+  <span class="bold"><strong>// enters a wait state.</strong></span>
+
+  <span class="bold"><strong>// The process execution will have entered the first wait state</strong></span>
+  <span class="bold"><strong>// in state 's'. So the main path of execution is now </strong></span>
+  <span class="bold"><strong>// positioned in state 's'</strong></span>
+  assertSame(processDefinition.getNode("s"), token.getNode());
+
+  <span class="bold"><strong>// Let's send another signal.  This will resume execution by </strong></span>
+  <span class="bold"><strong>// leaving the state 's' over its default transition.</strong></span>
+  token.signal();
+  <span class="bold"><strong>// Now the signal method returned because the process instance </strong></span>
+  <span class="bold"><strong>// has arrived in the end-state.</strong></span>
+  
+  assertSame(processDefinition.getNode("end"), token.getNode());
+}</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch02s02.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The JBoss jBPM cummunity page&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Database example</td></tr></table></div></body></html>

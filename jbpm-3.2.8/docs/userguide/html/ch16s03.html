@@ -1,0 +1,18 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Log retrieval</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch16.html" title="Chapter&nbsp;16.&nbsp;Logging"><link rel="prev" href="ch16s02.html" title="Log configurations"><link rel="next" href="ch16s04.html" title="Database warehousing"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Log retrieval</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch16s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;16.&nbsp;Logging</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch16s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="logretrieval"></a>Log retrieval</h2></div></div></div><p>As said before, logs cannot be retrieved from the database by navigating 
+    the LoggingInstance to its logs.  Instead, logs of a process instance should always 
+    be queried from the database.  The <code class="literal">LoggingSession</code> has 2 methods 
+    that serve this purpose.
+    </p><p>The first method retrieves all the logs for a process instance.  These logs
+    will be grouped by token in a Map.  The map will associate a List of ProcessLogs
+    with every Token in the process instance.  The list will contain the ProcessLogs 
+    in the same ordered as they were created.</p><pre class="programlisting">public class LoggingSession {
+  ...
+  public Map findLogsByProcessInstance(long processInstanceId) {...}
+  ...
+}</pre><p>The second method retrieves the logs for a specific Token. The returned list 
+    will contain the ProcessLogs in the same ordered as they were created.</p><pre class="programlisting">public class LoggingSession {
+  public List findLogsByToken(long tokenId) {...}
+  ...
+}</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch16s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch16.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch16s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Log configurations&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Database warehousing</td></tr></table></div></body></html>

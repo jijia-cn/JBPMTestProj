@@ -1,0 +1,23 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;12.&nbsp;Scheduler</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch11s11.html" title="The identity component"><link rel="next" href="ch12s02.html" title="Scheduler deployment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;12.&nbsp;Scheduler</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s11.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch12s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="scheduler"></a>Chapter&nbsp;12.&nbsp;Scheduler</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch12.html#timers">Timers</a></span></dt><dt><span class="section"><a href="ch12s02.html">Scheduler deployment</a></span></dt></dl></div><p>This chapter describes how to work with timers in jBPM.</p><p>Upon events in the process, timers can be created.  When a timer 
+  expires, an action can be executed or a transition can be taken.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="timers"></a>Timers</h2></div></div></div><p>The easiest way to specify a timer is by adding a timer element 
+    to the node.</p><pre class="programlisting">&lt;state name='catch crooks'&gt;
+  &lt;timer name='reminder' 
+         duedate='3 business hours' 
+         repeat='10 business minutes'
+         transition='time-out-transition' &gt;
+    &lt;action class='the-remainder-action-class-name' /&gt;
+  &lt;/timer&gt;
+  &lt;transition name='time-out-transition' to='...' /&gt;
+&lt;/state&gt;</pre><p>A timer that is specified on a node, is not executed after the node 
+    is left.  Both the transition and the action are optional.  When a timer 
+    is executed, the following events occur in sequence : </p><div class="itemizedlist"><ul type="disc"><li>an event is fired of type <code class="literal">timer</code></li><li>if an action is specified, the action is executed.</li><li>if a transition is specified, a signal will be sent to resume execution 
+      over the given transition.</li></ul></div><p>Every timer must have a unique name.  If no name is specified in the 
+    <code class="literal">timer</code> element, the name of the node is taken as the name 
+    of the timer.</p><p>The timer action can be any supported action element like e.g. 
+    <code class="literal">action</code> or <code class="literal">script</code>.</p><p>Timers are created and cancelled by actions.  The 2 action-elements are 
+    <code class="literal">create-timer</code> and <code class="literal">cancel-timer</code>. Actually, the 
+    timer element shown above is just a short notation for a create-timer action 
+    on <code class="literal">node-enter</code> and a cancel-timer action on 
+    <code class="literal">node-leave</code>.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s11.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch12s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The identity component&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Scheduler deployment</td></tr></table></div></body></html>

@@ -1,0 +1,67 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>jBPM Enterprise Configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch08.html" title="Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities"><link rel="prev" href="ch08.html" title="Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities"><link rel="next" href="ch08s03.html" title="Hibernate Enterprise Configuration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">jBPM Enterprise Configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch08s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="enterprisejbpmconfig"></a>jBPM Enterprise Configuration</h2></div></div></div><p><code class="literal">jbpm.cfg.xml</code> includes the following configuration items:
+    </p><pre class="programlisting">&lt;jbpm-context&gt;
+  &lt;service name="persistence"
+           factory="org.jbpm.persistence.jta.JtaDbPersistenceServiceFactory" /&gt;
+  &lt;service name="message"
+           factory="org.jbpm.msg.jms.JmsMessageServiceFactory" /&gt;
+  &lt;service name="scheduler"
+           factory="org.jbpm.scheduler.ejbtimer.EntitySchedulerServiceFactory" /&gt;
+&lt;/jbpm-context&gt;</pre><p><code class="literal">JtaDbPersistenceServiceFactory</code> enables jBPM to participate in JTA 
+    transactions. If an existing transaction is underway, the JTA persistence service clings to it; 
+    otherwise it starts a new transaction. The jBPM enterprise beans are configured to delegate
+    transaction management to the container. However, if you create a JbpmContext in an environment
+    where no transaction is active (say, in a web application), one will be started automatically.
+    The JTA persistence service factory has the configurable fields described below.
+    </p><div class="itemizedlist"><ul type="disc"><li><code class="literal">isCurrentSessionEnabled</code>: if <code class="literal">true</code>, jBPM will 
+      use the "current" Hibernate session associated with the ongoing JTA transaction. This is the
+      default setting. See the Hibernate guide, section <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html/architecture.html#architecture-current-session" target="_top">
+      2.5 Contextual sessions</a> for a description of the behavior. You can take advantage
+      of the contextual session mechanism to use the same session used by jBPM in other parts
+      of your application through a call to <code class="literal">SessionFactory.getCurrentSession()</code>.
+      On the other hand, you might want to supply your own Hibernate session to jBPM. To do so,
+      set <code class="literal">isCurrentSessionEnabled</code> to <code class="literal">false</code> and inject the 
+      session via the <code class="literal">JbpmContext.setSession(session)</code> method. This will also 
+      ensure that jBPM uses the same Hibernate session as other parts of your application. Note, 
+      the Hibernate session can be injected into a stateless session bean via a persistence context,
+      for example.
+      </li><li><code class="literal">isTransactionEnabled</code>: a <code class="literal">true</code> value for this
+      field means jBPM will begin a transaction through Hibernate's transaction API (section <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/v3/reference/en/html/transactions.html#transactions-demarcation" target="_top">
+      11.2. Database transaction demarcation</a> of the Hibernate manual shows the API) upon 
+      <code class="literal">JbpmConfiguration.createJbpmContext()</code>, commit the transaction and close the 
+      Hibernate session upon <code class="literal">JbpmContext.close()</code>. This is NOT the desired 
+      behaviour when jBPM is deployed as an ear, hence <code class="literal">isTransactionEnabled</code> is set
+      to <code class="literal">false</code> by default.
+      </li></ul></div><p><code class="literal">JmsMessageServiceFactory</code> leverages the reliable communication
+    infrastructure exposed through JMS interfaces to deliver asynchronous continuation messages
+    to the <code class="literal">JobListenerBean</code>. The JMS message service factory exposes the following
+    configurable fields.</p><div class="itemizedlist"><ul type="disc"><li><code class="literal">connectionFactoryJndiName</code>: the JNDI name of the JMS connection
+      factory. Defaults to <code class="literal">java:comp/env/jms/JbpmConnectionFactory</code>.
+      </li><li><code class="literal">destinationJndiName</code>: the JNDI name of the JMS destination where
+      job messages are sent. Must match the destination where <code class="literal">JobListenerBean</code>
+      receives messages. Defaults to <code class="literal">java:comp/env/jms/JobQueue</code>.
+      </li><li><code class="literal">isCommitEnabled</code>: tells whether the message service should
+      create a transacted session and either commit or rollback on close. Messages produced by the
+      JMS message service are never meant to be received before the database transaction commits.
+      The <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/j2ee/1.4/docs/tutorial/doc/JMS7.html#wp92011" target="_top">J2EE
+      tutorial</a> states "when you create a session in an enterprise bean, the container
+      ignores the arguments you specify, because it manages all transactional properties for
+      enterprise beans". Unfortunately the tutorial fails to indicate that said behavior is not 
+      prescriptive. JBoss ignores the <code class="literal">transacted</code> argument if the 
+      connection factory supports XA, since the overall JTA transaction controls the session.
+      Otherwise, <code class="literal">transacted</code> produces a locally transacted session. In <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://e-docs.bea.com/wls/docs103/jms/trans.html" target="_top">Weblogic</a>, JMS transacted
+      sessions are agnostic to JTA transactions even if the connection factory is XA enabled.
+      With <code class="literal">isCommitEnabled</code> set to <code class="literal">false</code> (the default),
+      the message service creates a nontransacted, auto-acknowledging session. Such a session
+      works with containers that either disregard the creation arguments or do not bind
+      transacted sessions to JTA. Conversely, setting <code class="literal">isCommitEnabled</code> to 
+      <code class="literal">true</code> causes the message service to create a transacted session and commit
+      or rollback according to the <code class="literal">TxService.isRollbackOnly</code> method.
+      </li></ul></div><p><code class="literal">EntitySchedulerServiceFactory</code> builds on the transactional notification
+    service for timed events provided by the EJB container to schedule business process timers. The
+    EJB scheduler service factory has the configurable field described below.
+    </p><div class="itemizedlist"><ul type="disc"><li><code class="literal">timerEntityHomeJndiName</code>: the name of the 
+      <code class="literal">TimerEntityBean</code>'s local home interface in the JNDI initial context. 
+      Defaults to <code class="literal">java:comp/env/ejb/TimerEntityBean</code>.
+      </li></ul></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch08.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch08s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Hibernate Enterprise Configuration</td></tr></table></div></body></html>

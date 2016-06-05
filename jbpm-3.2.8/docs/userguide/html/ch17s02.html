@@ -1,0 +1,81 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Delegation</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch17.html" title="Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)"><link rel="prev" href="ch17.html" title="Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)"><link rel="next" href="ch17s03.html" title="Expressions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Delegation</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch17.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch17s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="delegation"></a>Delegation</h2></div></div></div><p>Delegation is the mechanism used to include the users' custom code 
+    in the execution of processes.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thejbpmclassloader"></a>The jBPM class loader</h3></div></div></div><p>The jBPM class loader is the class loader that loads the jBPM classes.  
+      Meaning, the classloader that has the library <code class="literal">jbpm-3.x.jar</code>
+      in its classpath.  To make classes visible to the jBPM classloader, put them 
+      in a jar file and put the jar file besides the <code class="literal">jbpm-3.x.jar</code>.
+      E.g. in the WEB-INF/lib folder in the case of webapplications.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="theprocessclassloader"></a>The process class loader</h3></div></div></div><p>Delegation classes are loaded with the process class loader of their 
+      respective process definition.  The process class loader is a class loader 
+      that has the jBPM classloader as a parent.  The process class loader adds all 
+      the classes of one particular process definition.  You can add classes to a 
+      process definition by putting them in the <code class="literal">/classes</code> folder 
+      in the process archive. Note that this is only useful when you want to version 
+      the classes that you add to the process definition.  If versioning is not necessary, 
+      it is much more efficient to make the classes available to the jBPM class loader.</p><p>If the resource name doesn't start with a slash, resources are also loaded 
+      from the <code class="literal">/classes</code> directory  in the process archive.   If you 
+      want to load resources outside of the classes
+      directory, start with a double slash (<code class="literal"> // </code>).  For example
+      to load resource <code class="literal">data.xml</code> wich is located next to the 
+      processdefinition.xml on the root of the process archive file, you can do 
+      <code class="literal">clazz.getResource("//data.xml")</code> or 
+      <code class="literal">classLoader.getResourceAsStream("//data.xml")</code> or any of those 
+      variants.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="configurationofdelegations"></a>Configuration of delegations</h3></div></div></div><p>Delegation classes contain user code that is called from within the 
+      execution of a process.  The most common example is an action.  In the case of 
+      action, an implementation of the interface <code class="literal">ActionHandler</code> can 
+      be called on an event in the process.  Delegations are specified in the 
+      <code class="literal">processdefinition.xml</code>.  3 pieces of data can be supplied when 
+      specifying a delegation : </p><div class="itemizedlist"><ul type="disc"><li>1) the class name (required) : the fully qualified class name of the 
+                     delegation class.</li><li>2) configuration type (optional) : specifies the way to instantiate 
+                     and configure the delegation object.  By default the default 
+                     constructor is used and the configuration information is ignored.</li><li>3) configuration (optional) : the configuration of the delegation 
+                     object in the format as required by the configuration type.</li></ul></div><p>Next is a description of all the configuration types:</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="configtypefield"></a>config-type field</h4></div></div></div><p>This is the default configuration type. The <code class="literal">config-type field</code> will first instantiate an object 
+        of the delegation class and then set values in the fields of the object as 
+        specified in the configuration.  The configuration is xml, where the 
+        elementnames have to correspond with the field names of the class.  The content 
+        text of the element is put in the corresponding field.  If necessary and possible, 
+        the content text of the element is converted to the field type.
+        </p><p>Supported type conversions:</p><div class="itemizedlist"><ul type="disc"><li>String doesn't need converting, of course.  But it is trimmed.
+          </li><li>primitive types such as int, long, float, double, ...
+          </li><li>and the basic wrapper classes for the primitive types.
+          </li><li>lists, sets and collections.  In that case each element of the 
+          xml-content is consitered as an element of the collection and is parsed, recursively applying the 
+          conversions.  If the type of the elements is different from <code class="literal">java.lang.String</code> 
+          this can be indicated by specifying a type attribute with the fully qualified type name.
+          For example, following snippet will inject an ArrayList of Strings into field 'numbers':
+          <pre class="programlisting">&lt;numbers&gt;
+  &lt;element&gt;one&lt;/element&gt;
+  &lt;element&gt;two&lt;/element&gt;
+  &lt;element&gt;three&lt;/element&gt;
+&lt;/numbers&gt;</pre><p>The text in the elements can be converted to any object that has a String constructor.
+              To use another type then String, specify the <code class="literal">element-type</code> in the 
+              field element ('numbers' in this case).
+            </p><p>Here's another example of a map:
+            </p><pre class="programlisting">&lt;numbers&gt;
+  &lt;entry&gt;&lt;key&gt;one&lt;/key&gt;&lt;value&gt;1&lt;/value&gt;&lt;/entry&gt;
+  &lt;entry&gt;&lt;key&gt;two&lt;/key&gt;&lt;value&gt;2&lt;/value&gt;&lt;/entry&gt;
+  &lt;entry&gt;&lt;key&gt;three&lt;/key&gt;&lt;value&gt;3&lt;/value&gt;&lt;/entry&gt;
+&lt;/numbers&gt;</pre></li><li>maps.  In this case, each element of the field-element is expected to have one subelement 
+            <code class="literal">key</code> and one element <code class="literal">value</code>.  The key and element are both 
+              parsed using the conversion rules recursively.  Just the same as with collections, a conversion to 
+              <code class="literal">java.lang.String</code> is assumed if no <code class="literal">type</code> attribute is specified.
+            </li><li>org.dom4j.Element
+          </li><li>for any other type, the string constructor is used.
+          </li></ul></div><p>For example in the following class...</p><pre class="programlisting">public class MyAction implements ActionHandler {
+  // access specifiers can be private, default, protected or public
+  private String city;
+  Integer rounds;
+  ...
+}</pre><p>...this is a valid configuration:</p><pre class="programlisting">...
+&lt;action class="org.test.MyAction"&gt;
+  &lt;city&gt;Atlanta&lt;/city&gt;
+  &lt;rounds&gt;5&lt;/rounds&gt;
+&lt;/action&gt;
+...</pre></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="configtypebean"></a>config-type bean</h4></div></div></div><p>Same as <code class="literal">config-type field</code> but then the properties are 
+        set via setter methods, rather then directly on the fields.  The same conversions
+        are applied.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="configtypeconstructor"></a>config-type constructor</h4></div></div></div><p>This instantiator will take the complete contents of the delegation 
+        xml element and passes this as text in the delegation class constructor.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="configtypeconfigurationproperty"></a>config-type configuration-property</h4></div></div></div><p>First, the default constructor is used, then this instantiator will 
+        take the complete contents of the delegation xml element, and pass it as text 
+        in method <code class="literal">void configure(String);</code>. (as in jBPM 2)</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch17.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch17.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch17s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Expressions</td></tr></table></div></body></html>

@@ -1,0 +1,21 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Swimlanes</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s05.html" title="Task controllers"><link rel="next" href="ch11s07.html" title="Swimlane in start task"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Swimlanes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s05.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="swimlanes"></a>Swimlanes</h2></div></div></div><p>A swimlane is a process role.  It is a mechanism to specify that 
+    multiple tasks in the process should be done by the same actor.  So 
+    after the first task instance is created for a given swimlane, the actor 
+    should be remembered in the process for all subsequent tasks that are in 
+    the same swimlane.  A swimlane therefore has one 
+    <a href="ch11s03.html" title="Assignment"><code class="literal">assignment</code></a>
+    and all tasks that reference a swimlane should not specify an 
+    <a href="ch11s03.html" title="Assignment"><code class="literal">assignment</code></a>. 
+    </p><p>When the first task in a given swimlane is created, the 
+    <code class="literal">AssignmentHandler</code> of the swimlane is called.
+    The <code class="literal">Assignable</code> that is passed to the <code class="literal">AssignmentHandler</code>
+    will be the <code class="literal">SwimlaneInstance</code>.  Important to know is that 
+    all assignments that are done on the task instances in a given swimlane will 
+    propagate to the swimlane instance.  This behaviour is implemented as the default 
+    because the person that takes a task to fulfilling a certain process role will
+    have the knowledge of that perticular process.  So all subsequent assignements 
+    of task instances to that swimlane are done automatically to that user.
+    </p><p>Swimlane is a terminology borrowed from UML activity diagrams.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s05.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Task controllers&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Swimlane in start task</td></tr></table></div></body></html>

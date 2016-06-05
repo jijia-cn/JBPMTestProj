@@ -1,0 +1,21 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>jBPM's built-in asynchronous messaging</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch13.html" title="Chapter&nbsp;13.&nbsp;Asynchronous continuations"><link rel="prev" href="ch13s03.html" title="The job executor"><link rel="next" href="ch14.html" title="Chapter&nbsp;14.&nbsp;Business calendar"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">jBPM's built-in asynchronous messaging</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;13.&nbsp;Asynchronous continuations</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch14.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="jbpmsbuiltinasynchronousmessaging"></a>jBPM's built-in asynchronous messaging</h2></div></div></div><p>When using jBPM's built-in asynchronous messaging, job messages will be sent by persisting 
+      them to the database.  This message persisting can be done in the same transaction/JDBC 
+      connection as the jBPM process updates.
+    </p><p>The job messages will be stored in the <code class="literal">JBPM_JOB</code> table.
+    </p><p>The POJO command executor (<code class="literal">org.jbpm.msg.command.CommandExecutor</code>)
+      will read the messages from the database table and execute them.  So the typical 
+      transaction of the POJO command executor looks like this: 1) read next command message
+      2) execute command message 3) delete command message.
+    </p><p>If execution of a command message fails, the transaction will be rolled back.
+      After that, a new transaction will be started that adds the error message to the 
+      message in the database.  The command executor filters out all messages that contain
+      an exception.
+    </p><div class="figure"><a name="pojo.command.executor.image"></a><p class="title"><b>Figure&nbsp;13.3.&nbsp;POJO command executor transactions</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/pojo.command.executor.gif" align="middle" alt="POJO command executor transactions"></div></div></div><br class="figure-break"><p>If for some reason or another, the transaction that adds the exception to the 
+      command message would fail, it is rolled back as well.  In that case, the 
+      message remains in the queue without an exception so it will be retried later.
+    </p><p>Limitation: beware that jBPM's built-in asynchronous messaging system does 
+      not support multinode locking.  So you cannot just deploy the POJO command 
+      executor multiple times and have them configured to use the same database.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch13s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch13.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch14.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The job executor&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;14.&nbsp;Business calendar</td></tr></table></div></body></html>

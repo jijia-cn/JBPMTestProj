@@ -1,0 +1,17 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Second level cache</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06s08.html" title="Customizing the jBPM hibernate mapping files"><link rel="next" href="ch07.html" title="Chapter&nbsp;7.&nbsp;The jBPM Database"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Second level cache</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s08.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="secondlevelcache"></a>Second level cache</h2></div></div></div><p>jBPM uses hibernate's second level cache for keeping the process definitions 
+      in memory after loading them once.  The process definition classes and collections
+      are configured in the jBPM hibernate mapping files with the cache element like this:
+    </p><pre class="programlisting">&lt;cache usage="nonstrict-read-write"/&gt;</pre><p>Since process definitions (should) never change, it is ok to keep them in the 
+      second level cache.  See also <a href="ch17.html#changingdeployedprocessdefinitions" title="Changing deployed process definitions">the section called &#8220;Changing deployed process definitions&#8221;</a>.
+    </p><p>The second level cache is an important aspect of the JBoss jBPM implementation.
+      If it weren't for this cache, JBoss jBPM could have a serious drawback in comparison 
+      to the other techniques to implement a BPM engine.
+    </p><p>The default caching strategy is set to <code class="literal">nonstrict-read-write</code>.  During 
+    runtime execution of processes, the process definitions are static.  This way,
+    we get the maximum caching during runtime execution of processes.  In theory, 
+    caching strategy <code class="literal">read-only</code> would be even better for runtime 
+    execution.  But in that case, deploying new process definitions would not be 
+    possible as that operation is not read-only.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s08.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Customizing the jBPM hibernate mapping files&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;7.&nbsp;The jBPM Database</td></tr></table></div></body></html>

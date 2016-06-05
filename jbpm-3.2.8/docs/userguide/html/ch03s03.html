@@ -1,0 +1,48 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Context example: process variables</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Tutorial"><link rel="prev" href="ch03s02.html" title="Database example"><link rel="next" href="ch03s04.html" title="Task assignment example"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Context example: process variables</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;3.&nbsp;Tutorial</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e544"></a>Context example: process variables</h2></div></div></div><p>The process variables contain the context information during process executions.
+    The process variables are similar to a <code class="literal">java.util.Map</code> that maps 
+    variable names to values, which are java objects.  The process variables are persisted
+    as a part of the process instance.  To keep things simple, in this example we only show 
+    the API to work with variables, without persistence.</p><p>More information about variables can be found in <a href="ch10.html" title="Chapter&nbsp;10.&nbsp;Context">Chapter&nbsp;10, <i xmlns:xlink="http://www.w3.org/1999/xlink">Context</i></a></p><pre class="programlisting"><span class="bold"><strong>// This example also starts from the hello world process.</strong></span>
+<span class="bold"><strong>// This time even without modification.</strong></span>
+ProcessDefinition processDefinition = ProcessDefinition.parseXmlString(
+  "&lt;process-definition&gt;" +
+  "  &lt;start-state&gt;" +
+  "    &lt;transition to='s' /&gt;" +
+  "  &lt;/start-state&gt;" +
+  "  &lt;state name='s'&gt;" +
+  "    &lt;transition to='end' /&gt;" +
+  "  &lt;/state&gt;" +
+  "  &lt;end-state name='end' /&gt;" +
+  "&lt;/process-definition&gt;"
+);
+
+ProcessInstance processInstance =
+  new ProcessInstance(processDefinition);
+
+<span class="bold"><strong>// Fetch the context instance from the process instance </strong></span>
+<span class="bold"><strong>// for working with the process variables.</strong></span>
+ContextInstance contextInstance = 
+  processInstance.getContextInstance();
+
+<span class="bold"><strong>// Before the process has left the start-state, </strong></span>
+<span class="bold"><strong>// we are going to set some process variables in the </strong></span>
+<span class="bold"><strong>// context of the process instance.</strong></span>
+contextInstance.setVariable("amount", new Integer(500));
+contextInstance.setVariable("reason", "i met my deadline");
+
+<span class="bold"><strong>// From now on, these variables are associated with the </strong></span>
+<span class="bold"><strong>// process instance.  The process variables are now accessible </strong></span>
+<span class="bold"><strong>// by user code via the API shown here, but also in the actions </strong></span>
+<span class="bold"><strong>// and node implementations.  The process variables are also  </strong></span>
+<span class="bold"><strong>// stored into the database as a part of the process instance.</strong></span>
+
+processInstance.signal();
+
+<span class="bold"><strong>// The variables are accessible via the contextInstance. </strong></span>
+
+assertEquals(new Integer(500), 
+             contextInstance.getVariable("amount"));
+assertEquals("i met my deadline", 
+             contextInstance.getVariable("reason"));</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Database example&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Task assignment example</td></tr></table></div></body></html>

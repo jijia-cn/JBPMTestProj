@@ -1,0 +1,26 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Authentication</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch18.html" title="Chapter&nbsp;18.&nbsp;Security"><link rel="prev" href="ch18.html" title="Chapter&nbsp;18.&nbsp;Security"><link rel="next" href="ch18s03.html" title="Authorization"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Authentication</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch18.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;18.&nbsp;Security</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch18s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="authentication"></a>Authentication</h2></div></div></div><p>Authentication is the process of knowing on who's behalf the code 
+    is running.  In case of jBPM this information should be made available from the 
+    environment to jBPM.  Cause jBPM is always executed in a specific environment like
+    a webapp, an EJB, a swing application or some other environment, it is always the 
+    surrounding environment that should perform authentication.</p><p>In a few situations, jBPM needs to know who is running the code.  E.g. to add 
+    authentication information in the process logs to know who did what and when. Another 
+    example is calculation of an actor based on the current authenticated actor.</p><p>In each situation where jBPM needs to know who is running the code, the 
+    central method <code class="literal">org.jbpm.security.Authentication.getAuthenticatedActorId()</code>
+    is called.  That method will delegate to an implementation of 
+    <code class="literal">org.jbpm.security.authenticator.Authenticator</code>.  By specifying an
+    implementation of the authenticator, you can configure how jBPM retrieves the currently
+    authenticated actor from the environment.
+    </p><p>The default authenticator is 
+    <code class="literal">org.jbpm.security.authenticator.JbpmDefaultAuthenticator</code>.
+    That implementation will maintain a <code class="literal">ThreadLocal</code> stack of authenticated 
+    actorId's.  Authenticated blocks can be marked with the methods 
+    <code class="literal">JbpmDefaultAuthenticator.pushAuthenticatedActorId(String)</code> and 
+    <code class="literal">JbpmDefaultAuthenticator.popAuthenticatedActorId()</code>.  Be sure to always 
+    put these demarcations in a try-finally block.  For the push and pop methods of this 
+    authenticator implementation, there are convenience methods supplied on the base 
+    Authentication class.  The reason that the JbpmDefaultAuthenticator maintains a stack
+    of actorIds instead of just one actorId is simple: it allows the jBPM code to distinct
+    between code that is executed on behalf of the user and code that is executed on behalf of 
+    the jbpm engine.</p><p>See the javadocs for more information.</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch18.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch18.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch18s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;18.&nbsp;Security&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Authorization</td></tr></table></div></body></html>

@@ -1,0 +1,117 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Custom action example</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Tutorial"><link rel="prev" href="ch03s04.html" title="Task assignment example"><link rel="next" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Deployment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Custom action example</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;3.&nbsp;Tutorial</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customactionexample"></a>Custom action example</h2></div></div></div><p>Actions are a mechanism to bind your custom java code into a jBPM process.
+    Actions can be associated with its own nodes (if they are relevant in the graphical 
+    representation of the process).  Or actions can be placed on events like e.g. 
+    taking a transition, leaving a node or entering a node.  In that case, the actions 
+    are not part of the graphical representation, but they are executed when execution 
+    fires the events in a runtime process execution.</p><p>We'll start with a look at the action implementation that we are going to 
+    use in our example : <code class="literal">MyActionHandler</code>.  This action handler 
+    implementation does not do really spectacular things... it just sets the 
+    boolean variable <code class="literal">isExecuted</code> to <code class="literal">true</code>.  
+    The variable <code class="literal">isExecuted</code> is static so it can be accessed from 
+    within the action handler as well as from the action to verify it's value.
+    </p><p>More information about actions can be found in <a href="ch09s05.html" title="Actions">the section called &#8220;Actions&#8221;</a></p><pre class="programlisting"><span class="bold"><strong>// MyActionHandler represents a class that could execute </strong></span>
+<span class="bold"><strong>// some user code during the execution of a jBPM process.</strong></span>
+public class MyActionHandler implements ActionHandler {
+
+  <span class="bold"><strong>// Before each test (in the setUp), the isExecuted member </strong></span>
+  <span class="bold"><strong>// will be set to false.</strong></span>
+  public static boolean isExecuted = false;  
+
+  <span class="bold"><strong>// The action will set the isExecuted to true so the </strong></span>
+  <span class="bold"><strong>// unit test will be able to show when the action</strong></span>
+  <span class="bold"><strong>// is being executed.</strong></span>
+  public void execute(ExecutionContext executionContext) {
+    isExecuted = true;
+  }
+}</pre><p>As mentioned before, before each test, we'll set the static field 
+    <code class="literal">MyActionHandler.isExecuted</code> to false;</p><pre class="programlisting">  <span class="bold"><strong>// Each test will start with setting the static isExecuted </strong></span>
+  <span class="bold"><strong>// member of MyActionHandler to false.</strong></span>
+  public void setUp() {
+    MyActionHandler.isExecuted = false;
+  }</pre><p>We'll start with an action on a transition.</p><pre class="programlisting">public void testTransitionAction() {
+    <span class="bold"><strong>// The next process is a variant of the hello world process.</strong></span>
+    <span class="bold"><strong>// We have added an action on the transition from state 's' </strong></span>
+    <span class="bold"><strong>// to the end-state.  The purpose of this test is to show </strong></span>
+    <span class="bold"><strong>// how easy it is to integrate java code in a jBPM process.</strong></span>
+    ProcessDefinition processDefinition = ProcessDefinition.parseXmlString(
+      "<span class="bold"><strong>&lt;process-definition&gt;</strong></span>" +
+      "<span class="bold"><strong>  &lt;start-state&gt;</strong></span>" +
+      "<span class="bold"><strong>    &lt;transition to='s' /&gt;</strong></span>" +
+      "<span class="bold"><strong>  &lt;/start-state&gt;</strong></span>" +
+      "<span class="bold"><strong>  &lt;state name='s'&gt;</strong></span>" +
+      "<span class="bold"><strong>    &lt;transition to='end'&gt;</strong></span>" +
+      "<span class="bold"><strong>      &lt;action class='org.jbpm.tutorial.action.MyActionHandler' /&gt;</strong></span>" +
+      "<span class="bold"><strong>    &lt;/transition&gt;</strong></span>" +
+      "<span class="bold"><strong>  &lt;/state&gt;</strong></span>" +
+      "<span class="bold"><strong>  &lt;end-state name='end' /&gt;</strong></span>" +
+      "<span class="bold"><strong>&lt;/process-definition&gt;</strong></span>"
+    );
+    
+    <span class="bold"><strong>// Let's start a new execution for the process definition.</strong></span>
+    ProcessInstance processInstance = 
+      new ProcessInstance(processDefinition);
+    
+    <span class="bold"><strong>// The next signal will cause the execution to leave the start </strong></span>
+    <span class="bold"><strong>// state and enter the state 's'</strong></span>
+    processInstance.signal();
+
+    <span class="bold"><strong>// Here we show that MyActionHandler was not yet executed. </strong></span>
+    assertFalse(MyActionHandler.isExecuted);
+    <span class="bold"><strong>// ... and that the main path of execution is positioned in </strong></span>
+    <span class="bold"><strong>// the state 's'</strong></span>
+    assertSame(processDefinition.getNode("s"), 
+               processInstance.getRootToken().getNode());
+    
+    <span class="bold"><strong>// The next signal will trigger the execution of the root </strong></span>
+    <span class="bold"><strong>// token.  The token will take the transition with the</strong></span>
+    <span class="bold"><strong>// action and the action will be executed during the  </strong></span>
+    <span class="bold"><strong>// call to the signal method.</strong></span>
+    processInstance.signal();
+    
+    <span class="bold"><strong>// Here we can see that MyActionHandler was executed during </strong></span>
+    <span class="bold"><strong>// the call to the signal method.</strong></span>
+    assertTrue(MyActionHandler.isExecuted);
+  }</pre><p>The next example shows the same action, but now the actions are placed on 
+    the <code class="literal">enter-node</code> and <code class="literal">leave-node</code> events 
+    respectively.  Note that a node has more than one event type in contrast to 
+    a transition, which has only one event. Therefore actions placed on a  
+    node should be put in an event element.
+    </p><pre class="programlisting">ProcessDefinition processDefinition = ProcessDefinition.parseXmlString(
+  "&lt;process-definition&gt;" +
+  "  &lt;start-state&gt;" +
+  "    &lt;transition to='s' /&gt;" +
+  "  &lt;/start-state&gt;" +
+  "  &lt;state name='s'&gt;" +
+  "<span class="bold"><strong>    &lt;event type='node-enter'&gt;</strong></span>" +
+  "<span class="bold"><strong>      &lt;action class='org.jbpm.tutorial.action.MyActionHandler' /&gt;</strong></span>" +
+  "<span class="bold"><strong>    &lt;/event&gt;</strong></span>" +
+  "<span class="bold"><strong>    &lt;event type='node-leave'&gt;</strong></span>" +
+  "<span class="bold"><strong>      &lt;action class='org.jbpm.tutorial.action.MyActionHandler' /&gt;</strong></span>" +
+  "<span class="bold"><strong>    &lt;/event&gt;</strong></span>" +
+  "    &lt;transition to='end'/&gt;" +
+  "  &lt;/state&gt;" +
+  "  &lt;end-state name='end' /&gt;" +
+  "&lt;/process-definition&gt;"
+);
+
+ProcessInstance processInstance = 
+  new ProcessInstance(processDefinition);
+
+assertFalse(MyActionHandler.isExecuted);
+<span class="bold"><strong>// The next signal will cause the execution to leave the start </strong></span>
+<span class="bold"><strong>// state and enter the state 's'.  So the state 's' is entered </strong></span>
+<span class="bold"><strong>// and hence the action is executed. </strong></span>
+processInstance.signal();
+assertTrue(MyActionHandler.isExecuted);
+
+<span class="bold"><strong>// Let's reset the MyActionHandler.isExecuted  </strong></span>
+MyActionHandler.isExecuted = false;
+
+<span class="bold"><strong>// The next signal will trigger execution to leave the  </strong></span>
+<span class="bold"><strong>// state 's'.  So the action will be executed again. </strong></span>
+processInstance.signal();
+<span class="bold"><strong>// Voila.  </strong></span>
+assertTrue(MyActionHandler.isExecuted);
+</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Task assignment example&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;4.&nbsp;Deployment</td></tr></table></div></body></html>

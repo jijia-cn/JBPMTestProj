@@ -1,0 +1,132 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;5.&nbsp;Configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch04s04.html" title="Deployment in JBoss"><link rel="next" href="ch05s02.html" title="Configuration properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;5.&nbsp;Configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch04s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="configuration"></a>Chapter&nbsp;5.&nbsp;Configuration</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch05.html#customizingfactories">Customizing factories</a></span></dt><dt><span class="section"><a href="ch05s02.html">Configuration properties</a></span></dt><dt><span class="section"><a href="ch05s03.html">Other configuration files</a></span></dt><dd><dl><dt><span class="section"><a href="ch05s03.html#hibernatecfgxmlfile">Hibernate cfg xml file</a></span></dt><dt><span class="section"><a href="ch05s03.html#hibernatequeriesconfigurationfile">Hibernate queries configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#nodetypesconfigurationfile">Node types configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#actiontypesconfigurationfile">Action types configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#businesscalendarconfigurationfile">Business calendar configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#variablemappingconfigurationfile">Variable mapping configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#converterconfigurationfile">Converter configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#defaultmodulesconfigurationfile">Default modules configuration file</a></span></dt><dt><span class="section"><a href="ch05s03.html#parsersconfigurationfile">Process archive parsers configuration file</a></span></dt></dl></dd><dt><span class="section"><a href="ch05s04.html">Logging of optimistic concurrency exceptions</a></span></dt><dt><span class="section"><a href="ch05s05.html">Object factory</a></span></dt></dl></div><p>The simplest way to configure jBPM is by putting the <code class="literal">jbpm.cfg.xml</code> 
+    configuration file in the root of the classpath.  If that file is not found as a 
+    resource, the default minimal configuration will be used that is included in the 
+    jbpm library (<code class="literal">org/jbpm/default.jbpm.cfg.xml</code>).  If a jbpm configuration 
+    file is provided, the values configured will be used as defaults.  So you only 
+    need to specify the parts that are different from the default configuration file. 
+  </p><p>The jBPM configuration is represented by the java class <code class="literal">org.jbpm.JbpmConfiguration</code>.  
+  Most easy way to get a hold of the JbpmConfiguration is to make use of the singleton 
+  instance method <code class="literal">JbpmConfiguration.getInstance()</code>.
+  </p><p>If you want to load a configuration from another source, you can use the 
+    <code class="literal">JbpmConfiguration.parseXxxx</code> methods.
+  </p><pre class="programlisting">static JbpmConfinguration jbpmConfiguration = JbpmConfinguration.parseResource("my.jbpm.cfg.xml");</pre><p>The JbpmConfiguration is threadsafe and hence can be kept in a static member.  All threads can use 
+    the JbpmConfiguration as a factory for JbpmContext objects.  A JbpmContext typically represents one 
+    transaction.  The JbpmContext makes services available inside of a context block.  
+    A context block looks like this:
+  </p><pre class="programlisting">JbpmContext jbpmContext = jbpmConfiguration.createJbpmContext();
+try {
+  // This is what we call a context block.
+  // Here you can perform workflow operations
+
+} finally {
+  jbpmContext.close();
+}</pre><p>The <code class="literal">JbpmContext</code> makes a set of services and the configuration available 
+    to jBPM.  These services are configured in the <code class="literal">jbpm.cfg.xml</code> configuration file and 
+  make it possible for 
+   jBPM to run in any Java environment and use whatever services are available in that environment.
+  </p><p>Here's the default configuration for the JbpmContext:
+  </p><pre class="programlisting">&lt;jbpm-configuration&gt;
+
+  &lt;jbpm-context&gt;
+    &lt;service name='persistence' factory='org.jbpm.persistence.db.DbPersistenceServiceFactory' /&gt;
+    &lt;service name='message' factory='org.jbpm.msg.db.DbMessageServiceFactory' /&gt;
+    &lt;service name='scheduler' factory='org.jbpm.scheduler.db.DbSchedulerServiceFactory' /&gt;
+    &lt;service name='logging' factory='org.jbpm.logging.db.DbLoggingServiceFactory' /&gt;
+    &lt;service name='authentication' factory='org.jbpm.security.authentication.DefaultAuthenticationServiceFactory' /&gt;
+  &lt;/jbpm-context&gt;
+
+  &lt;!-- configuration resource files pointing to default configuration files in jbpm-{version}.jar --&gt;
+  &lt;string name='resource.hibernate.cfg.xml' value='hibernate.cfg.xml' /&gt;
+
+  &lt;!-- &lt;string name='resource.hibernate.properties' value='hibernate.properties' /&gt; --&gt;
+  &lt;string name='resource.business.calendar' value='org/jbpm/calendar/jbpm.business.calendar.properties' /&gt;
+  &lt;string name='resource.default.modules' value='org/jbpm/graph/def/jbpm.default.modules.properties' /&gt;
+  &lt;string name='resource.converter' value='org/jbpm/db/hibernate/jbpm.converter.properties' /&gt;
+  &lt;string name='resource.action.types' value='org/jbpm/graph/action/action.types.xml' /&gt;
+  &lt;string name='resource.node.types' value='org/jbpm/graph/node/node.types.xml' /&gt;
+  &lt;string name='resource.parsers' value='org/jbpm/jpdl/par/jbpm.parsers.xml' /&gt;
+  &lt;string name='resource.varmapping' value='org/jbpm/context/exe/jbpm.varmapping.xml' /&gt;
+  &lt;string name='resource.mail.templates' value='jbpm.mail.templates.xml' /&gt;
+
+  &lt;int name='jbpm.byte.block.size' value="1024" singleton="true" /&gt;
+  &lt;bean name='jbpm.task.instance.factory' class='org.jbpm.taskmgmt.impl.DefaultTaskInstanceFactoryImpl' singleton='true' /&gt;
+  &lt;bean name='jbpm.variable.resolver' class='org.jbpm.jpdl.el.impl.JbpmVariableResolver' singleton='true' /&gt;
+  &lt;string name='jbpm.mail.smtp.host' value='localhost' /&gt;
+  &lt;bean   name='jbpm.mail.address.resolver' class='org.jbpm.identity.mail.IdentityAddressResolver' singleton='true' /&gt;
+  &lt;string name='jbpm.mail.from.address' value='jbpm@noreply' /&gt;
+
+  &lt;bean name='jbpm.job.executor' class='org.jbpm.job.executor.JobExecutor'&gt;
+    &lt;field name='jbpmConfiguration'&gt;&lt;ref bean='jbpmConfiguration' /&gt;&lt;/field&gt;
+    &lt;field name='name'&gt;&lt;string value='JbpmJobExecutor' /&gt;&lt;/field&gt;
+    &lt;field name='nbrOfThreads'&gt;&lt;int value='1' /&gt;&lt;/field&gt;
+    &lt;field name='idleInterval'&gt;&lt;int value='5000' /&gt;&lt;/field&gt;
+    &lt;field name='maxIdleInterval'&gt;&lt;int value='3600000' /&gt;&lt;/field&gt; &lt;!-- 1 hour --&gt;
+    &lt;field name='historyMaxSize'&gt;&lt;int value='20' /&gt;&lt;/field&gt;
+    &lt;field name='maxLockTime'&gt;&lt;int value='600000' /&gt;&lt;/field&gt; &lt;!-- 10 minutes --&gt;
+    &lt;field name='lockMonitorInterval'&gt;&lt;int value='60000' /&gt;&lt;/field&gt; &lt;!-- 1 minute --&gt;
+    &lt;field name='lockBufferTime'&gt;&lt;int value='5000' /&gt;&lt;/field&gt; &lt;!-- 5 seconds --&gt;
+  &lt;/bean&gt;
+
+&lt;/jbpm-configuration&gt;</pre><p>In this configuration file you can see 3 parts:
+  </p><div class="itemizedlist"><ul type="disc"><li><p>The first part configures the jbpm context with a set of service 
+      implementations.  The possible configuration options are covered in the chapters 
+      that cover the specific service implementations.
+    </p></li><li><p>The second part are all mappings of references to configuration 
+      resources.  These resource references can be updated if you want to customize
+      one of these configuration files.  Typically, you make a copy the default configuration 
+      which is in the <code class="literal">jbpm-3.x.jar</code> and put it somewhere on the classpath.
+      Then you update the reference in this file and jbpm will use your customized version 
+      of that configuration file.
+    </p></li><li><p>The third part are some miscallanious configurations used in jbpm.
+      These configuration options are described in the chapters that cover the 
+      specific topic.
+    </p></li></ul></div><p>The default configured set of services is targetted at a simple webapp environment
+    and minimal dependencies.  The persistence service will obtain a jdbc connection and all 
+    the other services will use the same connection to perform their services.  So all of your 
+    workflow operations are centralized into 1 transaction on a JDBC connection without the 
+    need for a transaction manager.
+  </p><p><code class="literal">JbpmContext</code> contains convenience methods for most of the common 
+    process operations:
+  </p><pre class="programlisting">  public void deployProcessDefinition(ProcessDefinition processDefinition) {...}
+  public List getTaskList() {...}
+  public List getTaskList(String actorId) {...}
+  public List getGroupTaskList(List actorIds) {...}
+  public TaskInstance loadTaskInstance(long taskInstanceId) {...}
+  public TaskInstance loadTaskInstanceForUpdate(long taskInstanceId) {...}
+  public Token loadToken(long tokenId) {...}
+  public Token loadTokenForUpdate(long tokenId) {...}
+  public ProcessInstance loadProcessInstance(long processInstanceId) {...}
+  public ProcessInstance loadProcessInstanceForUpdate(long processInstanceId) {...}
+  public ProcessInstance newProcessInstance(String processDefinitionName) {...}
+  public void save(ProcessInstance processInstance) {...}
+  public void save(Token token) {...}
+  public void save(TaskInstance taskInstance) {...}
+  public void setRollbackOnly() {...}</pre><p>Note that the <code class="literal">XxxForUpdate</code> methods will register the loaded 
+    object for auto-save so that you don't have to call one of the save methods 
+    explicitely.
+  </p><p>It's possible to specify multiple <code class="literal">jbpm-context</code>s, but then you have 
+    to make sure that each <code class="literal">jbpm-context</code> is given a unique <code class="literal">name</code> 
+    attribute.  Named contexts can be retrieved with <code class="literal">JbpmConfiguration.createContext(String name);</code>
+  </p><p>A <code class="literal">service</code> element specifies the name of a service and the service factory
+    for that service.  The service will only be created in case it's asked for with 
+    <code class="literal">JbpmContext.getServices().getService(String name)</code>.
+  </p><p>The factories 
+    can also be specified as an element instead of an attribute.  That might be necessary to 
+    inject some configuration information in the factory objects.  The component responsible
+    for parsing the XML, creating and wiring the objects is called the object factory.  
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customizingfactories"></a>Customizing factories</h2></div></div></div><p>A common mistake when customizing factories is to mix the short and the long notation.
+    Examples of the short notation can be seen in the default configuration file and above: E.g.
+    </p><pre class="programlisting">  ...
+  &lt;service name='persistence' factory='org.jbpm.persistence.db.DbPersistenceServiceFactory' /&gt;</pre><p>If specific properties on a service need to be specified, the short notation can't be used, but instead, 
+    the long notation has to be used like this: E.g.
+    </p><pre class="programlisting">  &lt;service name="persistence"&gt;
+    &lt;factory&gt;
+      &lt;bean class="org.jbpm.persistence.db.DbPersistenceServiceFactory"&gt;
+        &lt;field name="dataSourceJndiName"&gt;&lt;string value="java:/myDataSource"/&gt;&lt;/field&gt; 
+        &lt;field name="isCurrentSessionEnabled"&gt;&lt;true /&gt;&lt;/field&gt; 
+        &lt;field name="isTransactionEnabled"&gt;&lt;false /&gt;&lt;/field&gt; 
+      &lt;/bean&gt;
+    &lt;/factory&gt;
+  &lt;/service&gt; </pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch04s04.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Deployment in JBoss&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Configuration properties</td></tr></table></div></body></html>

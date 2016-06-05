@@ -1,0 +1,76 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Transaction demarcation</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch09.html" title="Chapter&nbsp;9.&nbsp;Process Modelling"><link rel="prev" href="ch09s10.html" title="Graph execution"><link rel="next" href="ch10.html" title="Chapter&nbsp;10.&nbsp;Context"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Transaction demarcation</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch09s10.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;9.&nbsp;Process Modelling</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch10.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="transactiondemarcation"></a>Transaction demarcation</h2></div></div></div><p>As explained in <a href="ch09s10.html" title="Graph execution">the section called &#8220;Graph execution&#8221;</a> and 
+    <a href="">???</a>, jBPM runs the process in the thread of 
+    the client and is by nature synchronous.  Meaning that the <code class="literal">token.signal()</code>
+    or <code class="literal">taskInstance.end()</code> will only return when the process has entered a new 
+    wait state.
+    </p><p>The jPDL feature that we describe here from a modelling perspective is 
+    <a href="ch13.html" title="Chapter&nbsp;13.&nbsp;Asynchronous continuations">Chapter&nbsp;13, <i xmlns:xlink="http://www.w3.org/1999/xlink">Asynchronous continuations</i></a>.
+    </p><p>In most situations this is the most straightforward approach because the process 
+    execution can easily be bound to server side transactions: the process moves from one 
+    state to the next in one transaction.
+    </p><p>In some scenarios where in-process calculations take a lot of time, this behaviour 
+    might be undesirable.  To cope with this, jBPM includes an asynchronous messaging system
+    that allows to continue a process in an asynchronous manner.  Of course, in a java enterprise 
+    environment, jBPM can be configured to use a JMS message broker instead of the built in 
+    messaging system.
+    </p><p>In any node, jPDL supports the attribute <code class="literal">async="true"</code>.
+    Asynchronous nodes will not be executed in the thread of the client.  Instead, a message is 
+    sent over the asynschronous messaging system and the thread is returned to the client 
+    (meaning that the <code class="literal">token.signal()</code> or <code class="literal">taskInstance.end()</code> 
+    will return).
+    </p><p>Note that the jbpm client code can now commit the transaction.  The sending of the 
+    message should be done in the same transaction as the process updates.  So the net result of 
+    the transaction is that the token has moved to the next node (which has not yet been executed) 
+    and a <code class="literal">org.jbpm.command.ExecuteNodeCommand</code>-message has been sent on the 
+    asynchronous messaging system to the jBPM Command Executor.
+    </p><p>The jBPM Command Executor reads commands from the queue and executes them.  In the case 
+    of the <code class="literal">org.jbpm.command.ExecuteNodeCommand</code>, the process will be continued 
+    with executing the node.  Each command is executed in a separate transaction.
+    </p><p>So in order for asynchronous processes to continue, a jBPM Command Executor needs to 
+    be running.  The simplest way to do that is to configure the <code class="literal">CommandExecutionServlet</code>
+    in your web application.  Alternatively, you should make sure that the CommandExecutor thread is 
+    up and running in any other way.
+    </p><p>As a process modeller, you should not really be concerned with all this asynchronous 
+    messaging.  The main point to remember is transaction demarcation: By default jBPM will operate
+    in the transaction of the client, doing the whole calculation until the process enters a wait 
+    state.  Use <code class="literal">async="true"</code> to demarcate a transaction in the process.
+    </p><p>Let's look at an example:
+    </p><pre class="programlisting">...
+&lt;start-state&gt;
+  &lt;transition to="one" /&gt;
+&lt;/start-state&gt;
+&lt;node async="true" name="one"&gt;
+  &lt;action class="com...MyAutomaticAction" /&gt;
+  &lt;transition to="two" /&gt;
+&lt;/node&gt;
+&lt;node async="true" name="two"&gt;
+  &lt;action class="com...MyAutomaticAction" /&gt;
+  &lt;transition to="three" /&gt;
+&lt;/node&gt;
+&lt;node async="true" name="three"&gt;
+  &lt;action class="com...MyAutomaticAction" /&gt;
+  &lt;transition to="end" /&gt;
+&lt;/node&gt;
+&lt;end-state name="end" /&gt;
+...</pre><p>Client code to interact with process executions (starting and 
+    resuming) is exactly the same as with normal (synchronous) processes:
+    </p><pre class="programlisting">...start a transaction...
+JbpmContext jbpmContext = jbpmConfiguration.createContext();
+try {
+  ProcessInstance processInstance = jbpmContext.newProcessInstance("my async process");
+  processInstance.signal();
+  jbpmContext.save(processInstance);
+} finally {
+  jbpmContext.close();
+}</pre><p>After this first transaction, the root token of the process instance 
+    will point to node <code class="literal">one</code> and a 
+    <code class="literal">ExecuteNodeCommand</code>message will have been sent to the 
+    command executor.
+    </p><p>In a subsequent transaction, the command executor will read the message 
+    from the queue and execute node <code class="literal">one</code>.  The action can decide to 
+    propagate the execution or enter a wait state.  If the action decides to propagate 
+    the execution, the transaction will be ended when the execution arrives at 
+    node two.  And so on, and so on...
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch09s10.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch09.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch10.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Graph execution&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;10.&nbsp;Context</td></tr></table></div></body></html>

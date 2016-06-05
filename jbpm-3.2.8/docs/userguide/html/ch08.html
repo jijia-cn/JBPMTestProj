@@ -1,0 +1,70 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch07s03.html" title="Starting hsqldb manager on JBoss"><link rel="next" href="ch08s02.html" title="jBPM Enterprise Configuration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch08s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="enterprise"></a>Chapter&nbsp;8.&nbsp;Java EE Application Server Facilities</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch08.html#enterprisebeans">Enterprise Beans</a></span></dt><dt><span class="section"><a href="ch08s02.html">jBPM Enterprise Configuration</a></span></dt><dt><span class="section"><a href="ch08s03.html">Hibernate Enterprise Configuration</a></span></dt><dt><span class="section"><a href="ch08s04.html">Client Components</a></span></dt></dl></div><p>The present chapter describes the facilities offered by jBPM to leverage the Java EE
+  infrastructure.
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="enterprisebeans"></a>Enterprise Beans</h2></div></div></div><p><code class="literal">CommandServiceBean</code> is a stateless session bean that executes
+    jBPM commands by calling it's execute method within a separate jBPM context. The environment
+    entries and resources available for customization are summarized in the table below.
+    </p><div class="table"><a name="d0e2047"></a><p class="title"><b>Table&nbsp;8.1.&nbsp;Command service bean environment</b></p><div class="table-contents"><table summary="Command service bean environment" border="1"><colgroup><col align="left"><col align="left"><col align="left"></colgroup><thead><tr><th align="left">Name</th><th align="left">Type</th><th align="left">Description</th></tr></thead><tbody><tr><td align="left"><code class="literal">JbpmCfgResource</code></td><td align="left">Environment Entry</td><td align="left">The classpath resource from which to read the jBPM configuration.
+            Optional, defaults to <code class="literal">jbpm.cfg.xml</code>.
+            </td></tr><tr><td align="left"><code class="literal">ejb/TimerEntityBean</code></td><td align="left">EJB Reference</td><td align="left">Link to the local entity bean that implements the scheduler service.
+            Required for processes that contain timers.
+            </td></tr><tr><td align="left"><code class="literal">jdbc/JbpmDataSource</code></td><td align="left">Resource Manager Reference</td><td align="left">Logical name of the data source that provides JDBC connections to the
+            jBPM persistence service. Must match the <code class="literal">hibernate.connection.datasource
+            </code> property in the Hibernate configuration file.
+            </td></tr><tr><td align="left"><code class="literal">jms/JbpmConnectionFactory</code></td><td align="left">Resource Manager Reference</td><td align="left">Logical name of the factory that provides JMS connections to the jBPM
+            message service. Required for processes that contain asynchronous continuations.
+            </td></tr><tr><td align="left"><code class="literal">jms/JobQueue</code></td><td align="left">Message Destination Reference</td><td align="left">The jBPM message service sends job messages to the queue referenced here.
+            To ensure this is the same queue from which the job listener bean receives 
+            messages, the <code class="literal">message-destination-link</code> points to a common 
+            logical destination, <code class="literal">JobQueue</code>.
+            </td></tr><tr><td align="left"><code class="literal">jms/CommandQueue</code></td><td align="left">Message Destination Reference</td><td align="left">The command listener bean receives messages from the queue referenced here.
+            To ensure this is the same queue to which command messages can be sent,
+            the <code class="literal">message-destination-link element</code> points to a common 
+            logical destination, <code class="literal">CommandQueue</code>.
+            </td></tr></tbody></table></div></div><br class="table-break"><p><code class="literal">CommandListenerBean</code> is a message-driven bean that listens
+    on the <code class="literal">CommandQueue</code> for command messages. This bean delegates
+    command execution to the <code class="literal">CommandServiceBean</code>.
+    </p><p>The body of the message must be a Java object that implements the <code class="literal">
+    org.jbpm.Command</code> interface. The message properties, if any, are ignored.
+    If the message does not match the expected format, it is forwarded to the <code class="literal">
+    DeadLetterQueue</code>. No further processing is done on the message.
+    If the destination reference is absent, the message is rejected.
+    </p><p>In case the received message specifies a <code class="code">replyTo</code> destination,
+    the result of the command execution is wrapped into an object message and sent 
+    there. The command connection factory environment reference indicates the resource
+    manager that supplies JMS connections.
+    </p><p>Conversely, <code class="literal">JobListenerBean</code> is a message-driven bean that 
+    listens on the <code class="literal">JbpmJobQueue</code> for job messages to support asynchronous
+    continuations.
+    </p><p>The message must have a property called <code class="literal">jobId</code> of type 
+    <code class="literal">long</code> which references a pending <code class="literal">Job</code> in the
+    database. The message body, if any, is ignored.
+    </p><p>This bean extends the <code class="literal">CommandListenerBean</code> and inherits its
+    environment entries and resource references available for customization.
+    </p><div class="table"><a name="d0e2176"></a><p class="title"><b>Table&nbsp;8.2.&nbsp;Command/Job listener bean environment</b></p><div class="table-contents"><table summary="Command/Job listener bean environment" border="1"><colgroup><col align="left"><col align="left"><col align="left"></colgroup><thead><tr><th align="left">Name</th><th align="left">Type</th><th align="left">Description</th></tr></thead><tbody><tr><td align="left"><code class="code">ejb/LocalCommandServiceBean</code></td><td align="left">EJB Reference</td><td align="left">Link to the local session bean that executes commands on a separate 
+            jBPM context.
+            </td></tr><tr><td align="left"><code class="code">jms/JbpmConnectionFactory</code></td><td align="left">Resource Manager Reference</td><td align="left">Logical name of the factory that provides JMS connections for producing
+            result messages. Required for command messages that indicate a reply
+            destination.
+            </td></tr><tr><td align="left"><code class="code">jms/DeadLetterQueue</code></td><td align="left">Message Destination Reference</td><td align="left">Messages which do not contain a command are sent to the queue referenced
+            here. Optional; if absent, such messages are rejected, which may cause the 
+            container to redeliver.
+            </td></tr></tbody></table></div></div><br class="table-break"><p>The <code class="literal">TimerEntityBean</code> interacts with the EJB timer service to 
+    schedule jBPM timers. Upon expiration, execution of the timer is actually delegated to
+    the command service bean.</p><p>The timer entity bean requires access to the jBPM data source for reading timer
+    data. The EJB deployment descriptor does not provide a way to define how an entity bean
+    maps to a database. This is left off to the container provider. In JBoss AS, the 
+    <code class="literal">jbosscmp-jdbc.xml</code> descriptor defines the data source JNDI name and 
+    the relational mapping data (table and column names, among others). Note that the
+    JBoss CMP descriptor uses a global JNDI name (<code class="literal">java:JbpmDS</code>),
+    as opposed to a resource manager reference (<code class="literal">java:comp/env/jdbc/JbpmDataSource</code>).
+    </p><p>Earlier versions of jBPM used a stateless session bean called <code class="literal">TimerServiceBean
+    </code> to interact with the EJB timer service. The session approach had to be abandoned
+    because there is an unavoidable bottleneck at the cancelation methods. Because session beans
+    have no identity, the timer service is forced to iterate through <span class="emphasis"><em>all</em></span> 
+    the timers for finding the ones it has to cancel. The bean is still around for backwards
+    compatibility. It works under the same environment as the <code class="literal">TimerEntityBean</code>,
+    so migration is easy.
+    </p><div class="table"><a name="d0e2243"></a><p class="title"><b>Table&nbsp;8.3.&nbsp;Timer entity/service bean environment</b></p><div class="table-contents"><table summary="Timer entity/service bean environment" border="1"><colgroup><col align="left"><col align="left"><col align="left"></colgroup><thead><tr><th align="left">Name</th><th align="left">Type</th><th align="left">Description</th></tr></thead><tbody><tr><td align="left"><code class="code">ejb/LocalCommandServiceBean</code></td><td align="left">EJB Reference</td><td align="left">Link to the local session bean that executes timers on a separate jBPM context.
+            </td></tr></tbody></table></div></div><br class="table-break"></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s03.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch08s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Starting hsqldb manager on JBoss&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;jBPM Enterprise Configuration</td></tr></table></div></body></html>

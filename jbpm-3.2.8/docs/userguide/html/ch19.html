@@ -1,0 +1,56 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;19.&nbsp;TDD for workflow</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch18s03.html" title="Authorization"><link rel="next" href="ch19s02.html" title="XML sources"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;19.&nbsp;TDD for workflow</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch18s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch19s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="tdd"></a>Chapter&nbsp;19.&nbsp;TDD for workflow</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch19.html#intoducingtddforworkflow">Introducing TDD for workflow</a></span></dt><dt><span class="section"><a href="ch19s02.html">XML sources</a></span></dt><dd><dl><dt><span class="section"><a href="ch19s02.html#parsingaprocessarchive">Parsing a process archive</a></span></dt><dt><span class="section"><a href="ch19s02.html#parsinganxmlfile">Parsing an xml file</a></span></dt><dt><span class="section"><a href="ch19s02.html#parsinganxmlstring">Parsing an xml String</a></span></dt></dl></dd><dt><span class="section"><a href="ch19s03.html">Testing sub processes</a></span></dt></dl></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="intoducingtddforworkflow"></a>Introducing TDD for workflow</h2></div></div></div><p>Since developing process oriented software is no different from 
+    developing any other software, we believe that process definitions should
+    be easily testable.  This chapter shows how you can use plain JUnit without
+    any extensions to unit test the process definitions that you author.</p><p>The development cycle should be kept as short as possible.  Changes 
+    made to the sources of software should be immediately verifiable.  Preferably,
+    without any intermediate build steps.  The examples given below will show 
+    you how to develop and test jBPM processes without intermediate steps.</p><p>Mostly the unit tests of process definitions are execution scenarios.
+    Each scenario is executed in one JUnit testmethod and will feed in the external 
+    triggers (read: signals) into a process execution and verifies after each signal 
+    if the process is in the expected state.</p><p>Let's look at an example of such a test.  We take a simplified version of 
+    the auction process with the following graphical representation:</p><div class="figure"><a name="auction.test.image"></a><p class="title"><b>Figure&nbsp;19.1.&nbsp;The auction test process</b></p><div class="figure-contents"><div class="mediaobject" align="center"><img src="images/auction.test.gif" align="middle" alt="The auction test process"></div></div></div><br class="figure-break"><p>Now, let's write a test that executes the main scenario:</p><pre class="programlisting">public class AuctionTest extends TestCase {
+
+  // parse the process definition
+  static ProcessDefinition auctionProcess = 
+      ProcessDefinition.parseParResource("org/jbpm/tdd/auction.par");
+
+  // get the nodes for easy asserting
+  static StartState start = auctionProcess.getStartState();
+  static State auction = (State) auctionProcess.getNode("auction");
+  static EndState end = (EndState) auctionProcess.getNode("end");
+
+  // the process instance
+  ProcessInstance processInstance;
+
+  // the main path of execution
+  Token token;
+
+  public void setUp() {
+    // create a new process instance for the given process definition
+    processInstance = new ProcessInstance(auctionProcess);
+
+    // the main path of execution is the root token
+    token = processInstance.getRootToken();
+  }
+  
+  public void testMainScenario() {
+    // after process instance creation, the main path of 
+    // execution is positioned in the start state.
+    assertSame(start, token.getNode());
+    
+    token.signal();
+    
+    // after the signal, the main path of execution has 
+    // moved to the auction state
+    assertSame(auction, token.getNode());
+    
+    token.signal();
+    
+    // after the signal, the main path of execution has 
+    // moved to the end state and the process has ended
+    assertSame(end, token.getNode());
+    assertTrue(processInstance.hasEnded());
+  }
+}</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch18s03.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch19s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Authorization&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;XML sources</td></tr></table></div></body></html>

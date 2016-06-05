@@ -1,0 +1,63 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Customizing variable persistence</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch10.html" title="Chapter&nbsp;10.&nbsp;Context"><link rel="prev" href="ch10s05.html" title="Transient variables"><link rel="next" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Customizing variable persistence</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s05.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;10.&nbsp;Context</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customizingvariablepersistence"></a>Customizing variable persistence</h2></div></div></div><p>Variables are stored in the database in a 2-step approach :</p><pre class="programlisting">user-java-object &lt;---&gt; converter &lt;---&gt; variable instance</pre><p>Variables are stored in <code class="literal">VariableInstance</code>s.
+    The members of <code class="literal">VariableInstance</code>s are mapped to fields 
+    in the database with hibernate.  In the default configuration of jBPM,
+    6 types of VariableInstances are used:</p><div class="itemizedlist"><ul type="disc"><li><p><code class="literal">DateInstance</code> (with one java.lang.Date 
+      field that is mapped to a <code class="literal">Types.TIMESTAMP</code> in the 
+      database)</p></li><li><p><code class="literal">DoubleInstance</code> (with one java.lang.Double 
+      field that is mapped to a <code class="literal">Types.DOUBLE</code> in the 
+      database)</p></li><li><p><code class="literal">StringInstance</code> (with one java.lang.String 
+      field that is mapped to a <code class="literal">Types.VARCHAR</code> in the 
+      database)</p></li><li><p><code class="literal">LongInstance</code> (with one java.lang.Long
+      field that is mapped to a <code class="literal">Types.BIGINT</code> in the 
+      database)</p></li><li><p><code class="literal">HibernateLongInstance</code> (this is used for 
+      hibernatable types with a long id field. One java.lang.Object field is mapped 
+      as a reference to a hibernate entity in the database)</p></li><li><p><code class="literal">HibernateStringInstance</code> (this is used for 
+      hibernatable types with a string id field. One java.lang.Object field is mapped 
+      as a reference to a hibernate entity in the database)</p></li></ul></div><p><code class="literal">Converter</code>s convert between java-user-objects
+    and the java objects that can be stored by the 
+    <code class="literal">VariableInstance</code>s.  So when a process variable is set
+    with e.g. <code class="literal">ContextInstance.setVariable(String variableName, Object value)</code>,
+    the value will optionally be converted with a converter.  Then the converted 
+    object will be stored in a <code class="literal">VariableInstance</code>.  
+    <code class="literal">Converter</code>s are implementations of the following 
+    interface: </p><pre class="programlisting">public interface Converter extends Serializable {
+  boolean supports(Object value);
+  Object convert(Object o);
+  Object revert(Object o);
+}</pre><p>Converters are optional.  Converters must be available to 
+    <a href="ch17s02.html#thejbpmclassloader" title="The jBPM class loader">the jBPM class loader</a></p><p>The way that user-java-objects are converted and stored in 
+    variable instances is configured in the file 
+    <code class="literal">org/jbpm/context/exe/jbpm.varmapping.properties</code>.
+    To customize this property file, put a modified version in the root of 
+    the classpath, as explained in <a href="ch05s03.html" title="Other configuration files">the section called &#8220;Other configuration files&#8221;</a>
+    Each line of the properties file specifies 2 or 3 class-names separated by spaces : 
+    the classname of the user-java-object, optionally the classname of the converter 
+    and the classname of the variable instance.  When you refer your custom converters,
+    make sure they are in <a href="ch17s02.html#thejbpmclassloader" title="The jBPM class loader">the jBPM class path</a>.
+    When you refer to your custom variable instances, they also have to be in
+    the <a href="ch17s02.html#thejbpmclassloader" title="The jBPM class loader">the jBPM class path</a> and the hibernate 
+    mapping file for <code class="literal">org/jbpm/context/exe/VariableInstance.hbm.xml</code> 
+    has to be updated to include the custom subclass of VariableInstance.
+    </p><p>For example, take a look at the following xml snippet in the file 
+    <code class="literal">org/jbpm/context/exe/jbpm.varmapping.xml</code>.</p><pre class="programlisting">    &lt;jbpm-type&gt;
+      &lt;matcher&gt;
+        &lt;bean class="org.jbpm.context.exe.matcher.ClassNameMatcher"&gt;
+          &lt;field name="className"&gt;&lt;string value="java.lang.Boolean" /&gt;&lt;/field&gt;
+        &lt;/bean&gt;
+      &lt;/matcher&gt;
+      &lt;converter class="org.jbpm.context.exe.converter.BooleanToStringConverter" /&gt;
+      &lt;variable-instance class="org.jbpm.context.exe.variableinstance.StringInstance" /&gt;
+    &lt;/jbpm-type&gt;</pre><p>This snippet specifies that all objects of type <code class="literal">java.lang.Boolean</code> have 
+    to be converted with the converter <code class="literal">BooleanToStringConverter</code> and 
+    that the resulting object (a String) will be stored in a variable instance object 
+    of type StringInstance.</p><p>If no converter is specified as in</p><pre class="programlisting">    &lt;jbpm-type&gt;
+      &lt;matcher&gt;
+        &lt;bean class="org.jbpm.context.exe.matcher.ClassNameMatcher"&gt;
+          &lt;field name="className"&gt;&lt;string value="java.lang.Long" /&gt;&lt;/field&gt;
+        &lt;/bean&gt;
+      &lt;/matcher&gt;
+      &lt;variable-instance class="org.jbpm.context.exe.variableinstance.LongInstance" /&gt;
+    &lt;/jbpm-type&gt;</pre><p>that means that the Long objects that are put in the variables are just stored 
+    in a variable instance of type LongInstance without being converted.</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s05.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch10.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Transient variables&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;11.&nbsp;Task management</td></tr></table></div></body></html>

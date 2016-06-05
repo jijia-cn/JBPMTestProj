@@ -1,0 +1,68 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Task assignment example</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Tutorial"><link rel="prev" href="ch03s03.html" title="Context example: process variables"><link rel="next" href="ch03s05.html" title="Custom action example"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Task assignment example</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s03.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;3.&nbsp;Tutorial</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="taskassignmentexample"></a>Task assignment example</h2></div></div></div><p>In the next example we'll show how you can assign a task to a user. Because 
+    of the separation between the jBPM workflow engine and the organisational model, 
+    an expression language for calculating actors would always be too limited.  
+    Therefore, you have to specify an implementation of AssignmentHandler for 
+    including the calculation of actors for tasks.  
+    </p><pre class="programlisting">public void testTaskAssignment() {
+  <span class="bold"><strong>// The process shown below is based on the hello world process.</strong></span>
+  <span class="bold"><strong>// The state node is replaced by a task-node.  The task-node </strong></span>
+  <span class="bold"><strong>// is a node in JPDL that represents a wait state and generates </strong></span>
+  <span class="bold"><strong>// task(s) to be completed before the process can continue to </strong></span>
+  <span class="bold"><strong>// execute.  </strong></span>
+  ProcessDefinition processDefinition = ProcessDefinition.parseXmlString(
+    "<span class="bold"><strong>&lt;process-definition name='the baby process'&gt;"</strong></span> +
+    "<span class="bold"><strong>  &lt;start-state&gt;"</strong></span> +
+    "<span class="bold"><strong>    &lt;transition name='baby cries' to='t' /&gt;"</strong></span> +
+    "<span class="bold"><strong>  &lt;/start-state&gt;"</strong></span> +
+    "<span class="bold"><strong>  &lt;task-node name='t'&gt;"</strong></span> +
+    "<span class="bold"><strong>    &lt;task name='change nappy'&gt;"</strong></span> +
+    "<span class="bold"><strong>      &lt;assignment class='org.jbpm.tutorial.taskmgmt.NappyAssignmentHandler' /&gt;"</strong></span> +
+    "<span class="bold"><strong>    &lt;/task&gt;"</strong></span> +
+    "<span class="bold"><strong>    &lt;transition to='end' /&gt;"</strong></span> +
+    "<span class="bold"><strong>  &lt;/task-node&gt;"</strong></span> +
+    "<span class="bold"><strong>  &lt;end-state name='end' /&gt;"</strong></span> +
+    "<span class="bold"><strong>&lt;/process-definition&gt;"</strong></span>
+  );
+  
+  <span class="bold"><strong>// Create an execution of the process definition.</strong></span>
+  ProcessInstance processInstance = 
+      new ProcessInstance(processDefinition);
+  Token token = processInstance.getRootToken();
+  
+  <span class="bold"><strong>// Let's start the process execution, leaving the start-state </strong></span>
+  <span class="bold"><strong>// over its default transition.</strong></span>
+  token.signal();
+  <span class="bold"><strong>// The signal method will block until the process execution </strong></span>
+  <span class="bold"><strong>// enters a wait state.   In this case, that is the task-node.</strong></span>
+  assertSame(processDefinition.getNode("t"), token.getNode());
+
+  <span class="bold"><strong>// When execution arrived in the task-node, a task 'change nappy'</strong></span>
+  <span class="bold"><strong>// was created and the NappyAssignmentHandler was called to determine</strong></span>
+  <span class="bold"><strong>// to whom the task should be assigned.  The NappyAssignmentHandler </strong></span>
+  <span class="bold"><strong>// returned 'papa'.</strong></span>
+
+  <span class="bold"><strong>// In a real environment, the tasks would be fetched from the</strong></span>
+  <span class="bold"><strong>// database with the methods in the org.jbpm.db.TaskMgmtSession.</strong></span>
+  <span class="bold"><strong>// Since we don't want to include the persistence complexity in </strong></span>
+  <span class="bold"><strong>// this example, we just take the first task-instance of this </strong></span>
+  <span class="bold"><strong>// process instance (we know there is only one in this test</strong></span>
+  <span class="bold"><strong>// scenario).</strong></span>
+  TaskInstance taskInstance = (TaskInstance)  
+      processInstance
+        .getTaskMgmtInstance()
+        .getTaskInstances()
+        .iterator().next();
+
+  <span class="bold"><strong>// Now, we check if the taskInstance was actually assigned to 'papa'.</strong></span>
+  assertEquals("papa", taskInstance.getActorId() );
+  
+  <span class="bold"><strong>// Now we suppose that 'papa' has done his duties and mark the task </strong></span>
+  <span class="bold"><strong>// as done. </strong></span>
+  taskInstance.end();
+  <span class="bold"><strong>// Since this was the last (only) task to do, the completion of this</strong></span>
+  <span class="bold"><strong>// task triggered the continuation of the process instance execution.</strong></span>
+  
+  assertSame(processDefinition.getNode("end"), token.getNode());
+}</pre></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s03.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Context example: process variables&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Custom action example</td></tr></table></div></body></html>

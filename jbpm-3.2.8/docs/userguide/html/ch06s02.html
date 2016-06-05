@@ -1,0 +1,76 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Configuring the persistence service</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="next" href="ch06s03.html" title="Hibernate transactions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Configuring the persistence service</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="configurationthepersistenceservice"></a>Configuring the persistence service</h2></div></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thedbpersistenceservicefactory"></a>The DbPersistenceServiceFactory</h3></div></div></div><p>The DbPersistenceServiceFactory itself has 3 more configuration properties: isTransactionEnabled,
+        sessionFactoryJndiName and dataSourceJndiName. To specify any of these properties in the jbpm.cfg.xml, 
+        you need to specify the service factory as a bean in the factory element like this:
+      </p><p>IMPORTANT: don't mix the short and long notation for configuring the factories.  See also 
+      <a href="ch05.html#customizingfactories" title="Customizing factories">the section called &#8220;Customizing factories&#8221;</a>.   If the factory 
+      is just a new instance of a class, you can use the factory attribute to refer to the factory class name.
+      But if properties in a factory must be configured, the long notation must be used and factory and bean 
+      must be combined as nested elements. Like this:
+      </p><pre class="programlisting">  &lt;jbpm-context&gt;
+    &lt;service name="persistence"&gt;
+      &lt;factory&gt;
+        &lt;bean class="org.jbpm.persistence.db.DbPersistenceServiceFactory"&gt;
+          &lt;field name="isTransactionEnabled"&gt;&lt;false /&gt;&lt;/field&gt;
+          &lt;field name="sessionFactoryJndiName"&gt;
+            &lt;string value="java:/myHibSessFactJndiName" /&gt;
+          &lt;/field&gt;
+          &lt;field name="dataSourceJndiName"&gt;
+            &lt;string value="java:/myDataSourceJndiName" /&gt;
+          &lt;/field&gt;
+        &lt;/bean&gt;
+      &lt;/factory&gt;
+    &lt;/service&gt;
+    ...
+  &lt;/jbpm-context&gt;</pre><div class="itemizedlist"><ul type="disc"><li><span class="bold"><strong>isTransactionEnabled</strong></span>: by default, jBPM will 
+        begin a hibernate transaction when the session is fetched the first time and if the 
+        jbpmContext is closed, the hibernate transaction will be ended.  The transaction is then
+        committed or rolled back depending on wether jbpmContext.setRollbackOnly was called.  The 
+        isRollbackOnly property is maintained in the TxService.  To disable transactions and 
+        prohibit jBPM from managing transactions with hibernate, configure the isTransactionEnabled 
+        property to false as in the example above.  This property only controls the behaviour of 
+        the jbpmContext, you can still call the DbPersistenceService.beginTransaction() directly
+        with the API, which ignores the isTransactionEnabled setting.  
+        For more info about transactions, see
+        <a href="ch06s03.html" title="Hibernate transactions">the section called &#8220;Hibernate transactions&#8221;</a>.
+      </li><li><span class="bold"><strong>sessionFactoryJndiName</strong></span>: by default, this
+        is null, meaning that the session factory is not fetched from JNDI.  If set and 
+        a session factory is needed to create a hibernate session, the session factory
+        will be fetched from jndi using the provided JNDI name.
+      </li><li><span class="bold"><strong>dataSourceJndiName</strong></span>: by default, this is
+        null and creation of JDBC connections will be delegated to hibernate.  By specifying 
+        a datasource, jBPM will fetch a JDBC connection from the datasource and provide that 
+        to hibernate while opening a new session.  For user provided JDBC connections, 
+        see <a href="ch06.html#injectingresourcesprogrammatically" title="Injecting resources programmatically">the section called &#8220;Injecting resources programmatically&#8221;</a>.
+      </li></ul></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="thehibernatesessionfactory"></a>The hibernate session factory</h3></div></div></div><p>By default, the DbPersistenceServiceFactory will use the resource hibernate.cfg.xml
+        in the root of the classpath to create the hibernate session factory.  Note that the 
+        hibernate configuration file resource is mapped in the property 'jbpm.hibernate.cfg.xml' 
+        and can be customized in the jbpm.cfg.xml.  This is the default configuration:
+      </p><pre class="programlisting">&lt;jbpm-configuration&gt;
+  ...
+  &lt;!-- configuration resource files pointing to default configuration files in jbpm-{version}.jar --&gt;
+  &lt;string name='resource.hibernate.cfg.xml' 
+          value='hibernate.cfg.xml' /&gt;
+  &lt;!-- &lt;string name='resource.hibernate.properties' 
+                  value='hibernate.properties' /&gt; --&gt;
+  ...
+&lt;/jbpm-configuration&gt;</pre><p>When the property <span class="bold"><strong>resource.hibernate.properties</strong></span>
+        is specified, the properties in that resource file will <span class="bold"><strong>overwrite 
+        all</strong></span> the properties in the hibernate.cfg.xml.  Instead of updating the hibernate.cfg.xml to 
+        point to your DB, the hibernate.properties can be used to handle jbpm upgrades conveniently: 
+        The hibernate.cfg.xml can then be copied without having to reapply the changes.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="configuringac3poconnectionpool"></a>Configuring a c3po connection pool</h3></div></div></div><p>Please refer to the hibernate documentation: 
+        <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/214.html" target="_top">http://www.hibernate.org/214.html</a>
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="configuringehcache"></a>Configuring a ehcache cache provider</h3></div></div></div><p>If you want to configure jBPM with JBossCache, have a look at <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://wiki.jboss.org/wiki/Wiki.jsp?page=JbpmConfiguration" target="_top">
+      the jBPM configuration wiki page</a>
+      </p><p>For more information about configuring a cache provider in hibernate, take a look at <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.hibernate.org/hib_docs/reference/en/html/performance.html#performance-cache" target="_top">
+      the hibernate documentation, section 'Second level cache'</a>
+      </p><p>The hibernate.cfg.xml that ships with jBPM includes the following line:
+      </p><pre class="programlisting">&lt;property name="hibernate.cache.provider_class"&gt;org.hibernate.cache.HashtableCacheProvider&lt;/property&gt;</pre><p>This is done to get people up and running as fast as possible without having to worrie about classpaths.
+        Note that hibernate contains a warning that states not to use the HashtableCacheProvider in production.
+      </p><p>To use ehcache instead of the HashtableCacheProvider, simply remove that line and put ehcache.jar on the 
+      classpath.  Note that you might have to search for the right ehcache library version that is compatible with 
+      your environmment.  Previous incompatibilities between a jboss version and a perticular ehcache version were 
+      the reason to change the default to HashtableCacheProvider.
+      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;6.&nbsp;Persistence&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Hibernate transactions</td></tr></table></div></body></html>

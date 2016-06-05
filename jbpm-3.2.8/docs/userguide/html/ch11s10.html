@@ -1,0 +1,12 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Customizing task instances</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch11.html" title="Chapter&nbsp;11.&nbsp;Task management"><link rel="prev" href="ch11s09.html" title="Task timers"><link rel="next" href="ch11s11.html" title="The identity component"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Customizing task instances</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11s09.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;11.&nbsp;Task management</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch11s11.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="customizingtaskinstances"></a>Customizing task instances</h2></div></div></div><p>Task instances can be customized.  The easiest way to do this is
+    to create a subclass of <code class="literal">TaskInstance</code>.  Then create a 
+    <code class="literal">org.jbpm.taskmgmt.TaskInstanceFactory</code> implementation and 
+    configure it by setting the configuration property <code class="literal">jbpm.task.instance.factory</code> 
+    to the fully qualified class name in the jbpm.cfg.xml.  If you use a subclass of 
+    TaskInstance, also create a hibernate 
+    mapping file for the subclass (using the hibernate 
+    <code class="literal">extends="org.jbpm.taskmgmt.exe.TaskInstance"</code>).  Then 
+    add that mapping file to the list of mapping files in the 
+    <code class="literal">hibernate.cfg.xml</code></p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11s09.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch11s11.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Task timers&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;The identity component</td></tr></table></div></body></html>

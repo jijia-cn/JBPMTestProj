@@ -1,0 +1,19 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Combining your hibernate classes</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Persistence"><link rel="prev" href="ch06s06.html" title="Database compatibility"><link rel="next" href="ch06s08.html" title="Customizing the jBPM hibernate mapping files"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Combining your hibernate classes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s06.html">Prev</a>&nbsp;</td><th width="60%" align="center">Chapter&nbsp;6.&nbsp;Persistence</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s08.html">Next</a></td></tr></table><hr></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1767"></a>Combining your hibernate classes</h2></div></div></div><p>In your project, you might use hibernate for your persistence.  Combining your 
+      persistent classes with the jBPM persistent classes is optional.  There are two major 
+      benefits when combining your hibernate persistence with jBPM's hibernate persistence:
+    </p><p>First, session, connection and transaction management become easier.  By combining 
+      jBPM and your persistence into one hibernate session factory, 
+      there is one hibernate session, one jdbc connection that handles both yours and 
+      jBPM's persistence.  So automatically the jBPM updates are in the same transaction 
+      as the updates to your own domain model.  This can eliminates the need for using 
+      a transaction manager.
+    </p><p>Secondly, this enable you to drop your hibernatable persistent object in to the 
+      process variables without any further hassle.
+    </p><p>The easiest way
+      to integrate your persistent classes with the jBPM persistent classes is by 
+      creating one central hibernate.cfg.xml.  You can take the jBPM 
+      <code class="literal">hibernate.cfg.xml</code> as a starting point and 
+      add references to your own hibernate mapping files in there.
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s06.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s08.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Database compatibility&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Customizing the jBPM hibernate mapping files</td></tr></table></div></body></html>

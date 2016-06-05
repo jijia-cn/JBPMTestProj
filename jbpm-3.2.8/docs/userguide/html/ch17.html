@@ -1,0 +1,90 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="up" href="index.html" title="JBoss jBPM - Workflow in Java"><link rel="prev" href="ch16s04.html" title="Database warehousing"><link rel="next" href="ch17s02.html" title="Delegation"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch16s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch17s02.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="jpdl"></a>Chapter&nbsp;17.&nbsp;jBPM Process Definition Language (JPDL)</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="ch17.html#theprocessarchive">The process archive</a></span></dt><dd><dl><dt><span class="section"><a href="ch17.html#deployingaprocessarchive">Deploying a process archive</a></span></dt><dt><span class="section"><a href="ch17.html#processversioning">Process versioning</a></span></dt><dt><span class="section"><a href="ch17.html#changingdeployedprocessdefinitions">Changing deployed process definitions</a></span></dt><dt><span class="section"><a href="ch17.html#migratingprocessinstances">Migrating process instances</a></span></dt></dl></dd><dt><span class="section"><a href="ch17s02.html">Delegation</a></span></dt><dd><dl><dt><span class="section"><a href="ch17s02.html#thejbpmclassloader">The jBPM class loader</a></span></dt><dt><span class="section"><a href="ch17s02.html#theprocessclassloader">The process class loader</a></span></dt><dt><span class="section"><a href="ch17s02.html#configurationofdelegations">Configuration of delegations</a></span></dt></dl></dd><dt><span class="section"><a href="ch17s03.html">Expressions</a></span></dt><dt><span class="section"><a href="ch17s04.html">jPDL xml schema</a></span></dt><dd><dl><dt><span class="section"><a href="ch17s04.html#processdefinition.validation">Validation</a></span></dt><dt><span class="section"><a href="ch17s04.html#processdefinition.element">process-definition</a></span></dt><dt><span class="section"><a href="ch17s04.html#node.element">node</a></span></dt><dt><span class="section"><a href="ch17s04.html#common.node.elements">common node elements</a></span></dt><dt><span class="section"><a href="ch17s04.html#startstate.element">start-state</a></span></dt><dt><span class="section"><a href="ch17s04.html#endstate.element">end-state</a></span></dt><dt><span class="section"><a href="ch17s04.html#state.element">state</a></span></dt><dt><span class="section"><a href="ch17s04.html#tasknode.element">task-node</a></span></dt><dt><span class="section"><a href="ch17s04.html#processstate.element">process-state</a></span></dt><dt><span class="section"><a href="ch17s04.html#superstate.element">super-state</a></span></dt><dt><span class="section"><a href="ch17s04.html#fork.element">fork</a></span></dt><dt><span class="section"><a href="ch17s04.html#join.element">join</a></span></dt><dt><span class="section"><a href="ch17s04.html#decision.element">decision</a></span></dt><dt><span class="section"><a href="ch17s04.html#event.element">event</a></span></dt><dt><span class="section"><a href="ch17s04.html#transition.element">transition</a></span></dt><dt><span class="section"><a href="ch17s04.html#action.element">action</a></span></dt><dt><span class="section"><a href="ch17s04.html#script.element">script</a></span></dt><dt><span class="section"><a href="ch17s04.html#expression.element">expression</a></span></dt><dt><span class="section"><a href="ch17s04.html#variable.element">variable</a></span></dt><dt><span class="section"><a href="ch17s04.html#handler.element">handler</a></span></dt><dt><span class="section"><a href="ch17s04.html#timer.element">timer</a></span></dt><dt><span class="section"><a href="ch17s04.html#create.timer.element">create-timer</a></span></dt><dt><span class="section"><a href="ch17s04.html#cancel.timer.element">cancel-timer</a></span></dt><dt><span class="section"><a href="ch17s04.html#task.element">task</a></span></dt><dt><span class="section"><a href="ch17s04.html#swimlane.element">swimlane</a></span></dt><dt><span class="section"><a href="ch17s04.html#assignment.element">assignment</a></span></dt><dt><span class="section"><a href="ch17s04.html#controller.element">controller</a></span></dt><dt><span class="section"><a href="ch17s04.html#subprocess.element">sub-process</a></span></dt><dt><span class="section"><a href="ch17s04.html#condition.element">condition</a></span></dt><dt><span class="section"><a href="ch17s04.html#exceptionhandler.element">exception-handler</a></span></dt></dl></dd></dl></div><p>JPDL specifies an xml schema and the mechanism to package all the process 
+  definition related files into a process archive.
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="theprocessarchive"></a>The process archive</h2></div></div></div><p>A process archive is a zip file.  The central file in the process archive is 
+    <code class="literal">processdefinition.xml</code>.  The main information in that file is 
+    the process graph.  The <code class="literal">processdefinition.xml</code> also contains 
+    information about actions and tasks.  A process archive can also contain other 
+    process related files such as classes, ui-forms for tasks, ...</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="deployingaprocessarchive"></a>Deploying a process archive</h3></div></div></div><p>Deploying process archives can be done in 3 ways: with the process designer tool,
+      with an ant task or programatically.
+      </p><p>Deploying a process archive with the designer tool is supported in the starters-kit.
+        Right click on the process archive folder to find the "Deploy process archive" option.
+        The starters-kit server contains the jBPM webapp, which has a servlet to upload 
+        process archives called ProcessUploadServlet.  This servlet is capable of uploading 
+        process archives and deploying them to the default jBPM instance configured.
+      </p><p>Deploying a process archive with an ant task can be done as follows:
+      </p><pre class="programlisting">&lt;target name="deploy.par"&gt;
+  &lt;taskdef name="deploypar" classname="org.jbpm.ant.DeployProcessTask"&gt;
+    &lt;classpath --make sure the jbpm-[version].jar is in this classpath--/&gt;  
+  &lt;/taskdef&gt;  
+  &lt;deploypar par="build/myprocess.par" /&gt; 
+&lt;/target&gt;</pre><p>To deploy more process archives at once, use the nested fileset elements.
+      The file attribute itself is optional.  Other attributes of the ant task are:</p><div class="itemizedlist"><ul type="disc"><li><span class="bold"><strong>cfg</strong></span>: cfg is optional, the default value 
+        is 'hibernate.cfg.xml'. The hibernate configuration file that contains the jdbc 
+        connection properties to the database and the mapping files.</li><li><span class="bold"><strong>properties</strong></span>: properties is optional and 
+        overwrites *all* hibernate properties as found in the hibernate.cfg.xml</li><li><span class="bold"><strong>createschema</strong></span>: if set to true, the jbpm 
+        database schema is created before the processes get deployed.</li></ul></div><p>Process archives can also be deployed programmatically with the class 
+      <code class="literal">org.jbpm.jpdl.par.ProcessArchiveDeployer</code> </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="processversioning"></a>Process versioning</h3></div></div></div><p>What happens when we have a process definition deployed, many executions 
+      are not yet finished and we have a new version of the process definition that 
+      we want to deploy ?
+      </p><p>Process instances always execute to the process definition that they are 
+      started in.  But jBPM allows for multiple process definitions of 
+      the same name to coexist in the database.  So typically, a process instance is 
+      started in the latest version available at that time and it will keep on executing in 
+      that same process definition for its complete lifetime.  When a newer version 
+      is deployed, newly created instances will be started in the newest version, 
+      while older process instances keep on executing in the older process
+      defintions.</p><p>If the process includes references to Java classes, the java classes can be 
+      made available to the jBPM runtime environment in 2 ways : by making sure these 
+      classes are visible to the jBPM classloader.  This usually means that you can 
+      put your delegation classes in a <code class="literal">.jar</code> file next to the 
+      <code class="literal">jbpm-[version].jar</code>.  In that case, all the process definitions 
+      will see that same class file.  The java classes can also be included 
+      in the process archive.  When you include your delegation classes in the process 
+      archive (and they are not visible to the jbpm classloader), jBPM will also version 
+      these classes inside the process definition.  More information about process classloading 
+      can be found in <a href="ch17s02.html" title="Delegation">the section called &#8220;Delegation&#8221;</a>
+      </p><p>When a process archive gets deployed, it creates a process definition in 
+      the jBPM database.  Process definitions can be versioned on the basis of the 
+      process definition name.  When a named process archive gets deployed, the deployer 
+      will assign a version number.  To assign this number, the deployer will look 
+      up the highest version number for process definitions with the same name and 
+      adds 1.  Unnamed process definitions will always have version number -1.
+      </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="changingdeployedprocessdefinitions"></a>Changing deployed process definitions</h3></div></div></div><p>Changing process definitions after they are deployed into the 
+          jBPM database has many potential pitfalls.  Therefor, this is highly
+          discouraged.
+        </p><p>Actually, there is a whole variety of possible changes that can 
+          be made to a process definition.  Some of those process definitions 
+          are harmless, but some other changes have implications far beyond the 
+          expected and desirable.
+        </p><p>So please consider <a href="ch17.html#migratingprocessinstances" title="Migrating process instances">migrating 
+        process instances</a> to a new definition over this approach.
+        </p><p>In case you would consider it, these are the points to take into 
+          consideration:
+        </p><p><span class="bold"><strong>Use hibernate's update</strong></span>: You can 
+          just load a process definition, change it and save it with the 
+          hibernate session.  The hibernate session can be accessed with 
+          the method <code class="literal">JbpmContext.getSession()</code>.
+        </p><p><span class="bold"><strong>The second level cache</strong></span>: A process 
+          definition would need to be removed from the second level cache after 
+          you've updated an existing process definition.  See also <a href="ch06s09.html" title="Second level cache">the section called &#8220;Second level cache&#8221;</a>
+        </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="migratingprocessinstances"></a>Migrating process instances</h3></div></div></div><p>An alternative approach to changing process definitions might be 
+          to convert the executions to a new process definition.  Please take 
+          into account that this is not trivial due to the long-lived nature of 
+          business processes.  Currently, this is an experimental area so for which 
+          there are not yet much out-of-the-box support.
+        </p><p>As you know 
+          there is a clear distinction between process definition data, process 
+          instance data (the runtime data) and the logging data.  With this approach, you create a separate new process definition 
+          in the jBPM database (by e.g. deploying a new version of the same 
+          process).  Then the runtime information is converted to the new process 
+          definition.  This might involve a translation cause tokens in the old 
+          process might be pointing to nodes that have been removed in the new 
+          version.  So only new data is created in the database.  But one execution of 
+          a process is spread over two process instance objects.  This might 
+          become a bit tricky for the tools and statistics calculations.
+          When resources permit us, we are going to add support for this in the 
+          future.  E.g. a pointer could be added from one process instance to 
+          it's predecessor.
+        </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch16s04.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch17s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Database warehousing&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Delegation</td></tr></table></div></body></html>
