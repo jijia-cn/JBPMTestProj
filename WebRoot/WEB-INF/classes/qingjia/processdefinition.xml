@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="qingjia">
+
+	<start-state name="begin">
+		<transition to="jingli"></transition>
+	</start-state>
+
+	<state name="jingli">
+		<transition to="end"></transition>
+	</state>
+
+	<end-state name="end"></end-state>
+
+	<task name="jingli">
+		<assignment actor-id="2"></assignment>
+	</task>
+
+</process-definition>

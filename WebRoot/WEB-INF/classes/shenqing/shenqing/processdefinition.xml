@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="shenqing">
+
+
+	<start-state name="申请">
+		<transition to="经理审批"></transition>
+	</start-state>
+
+
+	<task-node name="经理审批">
+		<task name="shenpi">
+			<assignment actor-id="2"></assignment>
+		</task>
+		<transition to="总经理审批"></transition>
+	</task-node>
+
+	<task-node name="总经理审批">
+		<task name="zongjingli">
+			<assignment actor-id="3"></assignment>
+		</task>
+		<transition to="结束"></transition>
+	</task-node>
+
+
+	<end-state name="结束"></end-state>
+
+
+</process-definition>
